@@ -1,0 +1,351 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Comic Neue', 'Trebuchet MS', sans-serif;
+  background: linear-gradient(160deg, #fef6e4 0%, #e8f6ff 50%, #fef0f6 100%);
+  color: #3a3a3a;
+  overflow: hidden; /* nunca hay scroll: pensado para pantallas 16:9 (Chromebook) */
+}
+
+.app {
+  height: 100vh;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 10px 18px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+/* ----- Cabecera (compacta) ----- */
+.cabecera {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.cabecera h1 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #4a3f8a;
+  white-space: nowrap;
+}
+
+.subtitulo {
+  display: none; /* se omite para ganar espacio vertical en pantallas 16:9 */
+}
+
+.progreso-caja {
+  flex: 1 1 auto;
+  max-width: 560px;
+  margin: 0 0 0 auto;
+}
+
+.progreso-info {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 3px;
+  color: #4a3f8a;
+}
+
+.barra-progreso {
+  width: 100%;
+  height: 13px;
+  background: #ffffff;
+  border: 2px solid #4a3f8a;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barra-relleno {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #7bd88a, #4fc76b);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+/* ----- Contenido principal ----- */
+main {
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 10px 18px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.enunciado {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff7de;
+  border: 2px dashed #f4c96b;
+  border-radius: 14px;
+  padding: 8px 16px;
+}
+
+.emoji-personaje {
+  font-size: 2rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+#texto-problema {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #6a4a12;
+  line-height: 1.25;
+}
+
+/* ----- Esquema ----- */
+.esquema-seccion {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.diagrama-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.diagrama {
+  position: relative;
+  background: #f4f7ff;
+  border-radius: 14px;
+  border: 2px solid #d8e0f5;
+  /* el ancho y alto reales los fija script.js en px, manteniendo la proporción 900x550 */
+}
+
+.caja {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #4a3f8a;
+  border-radius: 8px;
+  background: #ffffff;
+  font-weight: 700;
+  font-size: calc(var(--escala, 1) * 24px);
+  color: #333;
+}
+
+.caja.fija {
+  background: #eef1ff;
+  color: #4a3f8a;
+}
+
+.caja input {
+  width: 88%;
+  height: 80%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: calc(var(--escala, 1) * 22px);
+  color: #333;
+}
+
+.caja input:focus {
+  outline: 2px solid #7bd88a;
+  border-radius: 6px;
+}
+
+.caja.destacada {
+  background: #ffe9a8;
+  border-color: #d69e2e;
+}
+
+.caja.destacada input {
+  color: #7a4a00;
+}
+
+.caja.error {
+  animation: sacudir 0.4s ease;
+  border-color: #e05252;
+}
+
+.caja.correcto {
+  background: #eaffef;
+  border-color: #4fc76b;
+}
+
+.caja.correcto input {
+  color: #1c6b34;
+}
+
+.operador {
+  position: absolute;
+  font-size: calc(var(--escala, 1) * 28px);
+  font-weight: 700;
+  color: #4a3f8a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.linea {
+  position: absolute;
+  height: 2.5px;
+  border-radius: 2px;
+  transform-origin: left center;
+}
+
+.linea.roja { background: #e05252; }
+.linea.azul { background: #4a7fd6; }
+.linea.negra { background: #444444; }
+.linea.verde { background: #3fa64f; }
+.linea.negra { background: #555; }
+
+@keyframes sacudir {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+/* ----- Respuesta ----- */
+.respuesta-seccion {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+}
+
+#btn-verificar {
+  padding: 9px 26px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7bd88a, #4fc76b);
+  color: #1c3a22;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(79, 199, 107, 0.4);
+  transition: transform 0.15s ease;
+  white-space: nowrap;
+}
+
+#btn-verificar:hover {
+  transform: translateY(-2px);
+}
+
+#btn-verificar:active {
+  transform: translateY(0);
+}
+
+.feedback {
+  flex: 0 0 auto;
+  min-height: 20px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+
+.feedback.correcto { color: #2e9b4f; }
+.feedback.incorrecto { color: #d1483f; }
+
+/* ----- Pantalla final ----- */
+.pantalla-final {
+  position: fixed;
+  inset: 0;
+  background: rgba(40, 30, 70, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.pantalla-final.oculto {
+  display: none;
+}
+
+.contenido-final {
+  background: #fffdf6;
+  border-radius: 22px;
+  padding: 5vh 5vw;
+  text-align: center;
+  max-width: 90vw;
+  max-height: 90vh;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.trofeo {
+  font-size: 3.4rem;
+}
+
+.contenido-final h2 {
+  color: #4a3f8a;
+  margin: 4px 0 8px;
+  font-size: 1.7rem;
+}
+
+.contenido-final p {
+  font-size: 1.05rem;
+  margin: 4px 0;
+}
+
+.resumen-estrellas {
+  font-weight: 700;
+  color: #d69e2e;
+  font-size: 1.3rem !important;
+}
+
+#btn-reiniciar {
+  margin-top: 14px;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #8a7bd8, #6a4fc7);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* ----- Confetti ----- */
+#confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 60;
+}
+
+.confeti {
+  position: absolute;
+  top: -40px;
+  font-size: 1.5rem;
+  animation: caer linear forwards;
+}
+
+@keyframes caer {
+  to {
+    transform: translateY(110vh) rotate(360deg);
+    opacity: 0.2;
+  }
+}
