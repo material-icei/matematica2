@@ -309,7 +309,7 @@
      URL_GUARDADO: dirección de la "aplicación web" de Google Apps Script
      que guarda las imágenes en la carpeta de Drive (ver README.md).
      La carpeta de destino se define dentro de ese script, no acá. */
-  const URL_GUARDADO = 'https://script.google.com/macros/s/AKfycbzJXqjIsSiG45zLuk3OY47e6JZHH8PTKfwRY4loX4qdx4zv90Aa9DTVdBkeGfFcSEMv2A/exec';
+  const URL_GUARDADO = 'https://script.google.com/macros/s/AKfycbzg4EmFZ_skAGZW5OYQPYXGYiDuKqXv1MUegfnwv-0_1S3C0a_aVaVrPY0ixsB0wrLDMg/exec';
 
   /* Grados que el alumno puede elegir al guardar */
   const GRADOS = ['2ºA', '2ºB'];
@@ -1804,9 +1804,41 @@
   /* Quita caracteres que no pueden ir en un nombre de archivo */
   const limpiarParaArchivo = (texto) => texto.trim().replace(/\s+/g, ' ').replace(/[\\/:*?"<>|#%]/g, '');
 
-  /* Nombre del archivo: "grado-sector-nombre-x.png" */
-  function nombreDelArchivo(numero) {
-    return [alumno.grado, estado.lugar.nombre, alumno.nombre, numero].map((t) => limpiarParaArchivo(String(t))).join('-') + '.png';
+  /* Nombre del archivo: "grado-sector-nombre-x.png" (o "…-maqueta.json" para la vista 360°) */
+  function nombreDelArchivo(sufijo, extension) {
+    return [alumno.grado, estado.lugar.nombre, alumno.nombre, sufijo]
+      .map((t) => limpiarParaArchivo(String(t))).join('-') + '.' + (extension || 'png');
+  }
+
+  /* Qué se guarda: las 4 vistas (PNG) y la maqueta 360° (JSON) */
+  const TAREAS_GUARDADO = VISTAS_A_GUARDAR.concat(['maqueta']);
+
+  const nombreDeTarea = (tarea, i) => (tarea === 'maqueta'
+    ? nombreDelArchivo('maqueta', 'json')
+    : nombreDelArchivo(i + 1));
+
+  /* Miniatura chica (JPG) para la galería del visualizador */
+  async function miniaturaDeMaqueta() {
+    const foto = await cargarImagen(fotosVistas.libre);
+    const lienzo = document.createElement('canvas');
+    lienzo.width = 480;
+    lienzo.height = 300;
+    lienzo.getContext('2d').drawImage(foto, 0, 0, 480, 300);
+    return lienzo.toDataURL('image/jpeg', 0.75);
+  }
+
+  /* Archivo de la maqueta 360°: la "receta" con todos los cuerpos */
+  async function maquetaComoTexto() {
+    return JSON.stringify({
+      app: 'construimos-escuela',
+      version: 1,
+      grado: alumno.grado,
+      alumno: alumno.nombre,
+      lugar: { id: estado.lugar.id, nombre: estado.lugar.nombre },
+      fecha: new Date().toISOString(),
+      miniatura: await miniaturaDeMaqueta(),
+      cuerpos: fotoDeLaMaqueta()
+    });
   }
 
   function dibujarGrados() {
@@ -1829,24 +1861,25 @@
   function dibujarProgreso() {
     const iconos = { espera: '⏳', subiendo: '☁️', ok: '✅', error: '⚠️' };
     const textos = { espera: 'Esperando…', subiendo: 'Guardando…', ok: 'Guardada', error: 'No se guardó' };
-    $('#lista-progreso').innerHTML = VISTAS_A_GUARDAR.map((id, i) => `
+    $('#lista-progreso').innerHTML = TAREAS_GUARDADO.map((tarea, i) => `
       <li class="${subidas[i]}">
         <span class="icono-progreso" aria-hidden="true">${iconos[subidas[i]]}</span>
-        <span><strong>${VISTAS[id].nombre}</strong>: ${textos[subidas[i]]}
-          <small>${escaparHTML(nombreDelArchivo(i + 1))}</small></span>
+        <span><strong>${tarea === 'maqueta' ? 'Maqueta para ver en 360°' : VISTAS[tarea].nombre}</strong>: ${textos[subidas[i]]}
+          <small>${escaparHTML(nombreDeTarea(tarea, i))}</small></span>
       </li>`).join('');
   }
 
-  /* Envía una imagen al script de Google (Apps Script) que la guarda en la carpeta */
-  async function subirImagen(nombreArchivo, imagen) {
+  /* Envía un archivo al script de Google (Apps Script) que lo guarda en la carpeta.
+     "datos" lleva la imagen (PNG) o el contenido (JSON). */
+  async function subirArchivo(nombreArchivo, datos) {
     const respuesta = await fetch(URL_GUARDADO, {
       method: 'POST',
       // "text/plain" evita la consulta previa del navegador, que Apps Script no acepta
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ nombreArchivo, imagen })
+      body: JSON.stringify(Object.assign({ nombreArchivo }, datos))
     });
-    const datos = await respuesta.json();
-    if (!datos.ok) throw new Error(datos.error || 'No se pudo guardar');
+    const resultado = await respuesta.json();
+    if (!resultado.ok) throw new Error(resultado.error || 'No se pudo guardar');
   }
 
   /* Revisa los datos del alumno y empieza a guardar */
@@ -1858,25 +1891,29 @@
     if (!URL_GUARDADO) { aviso.textContent = 'El guardado en Drive todavía no está preparado. Avisale a tu docente.'; return; }
     if (!navigator.onLine) { aviso.textContent = 'No hay internet en este momento. Probá de nuevo en un ratito.'; return; }
     alumno.nombre = nombre.slice(0, 40);
-    subidas = VISTAS_A_GUARDAR.map(() => 'espera');
+    subidas = TAREAS_GUARDADO.map(() => 'espera');
     $('#guardar-formulario').classList.add('oculto');
     $('#guardar-progreso').classList.remove('oculto');
     guardarVistasEnDrive();
   }
 
-  /* Guarda una por una las vistas que todavía no se guardaron */
+  /* Guarda uno por uno los archivos que todavía no se guardaron */
   async function guardarVistasEnDrive() {
     $('#ventana-guardar .btn-cerrar').classList.add('oculto');
     $('#btn-guardar-reintentar').classList.add('oculto');
     $('#btn-guardar-volver').disabled = true;
     $('#guardar-resultado').textContent = 'Guardando tu maqueta… no cierres esta ventana.';
 
-    for (let i = 0; i < VISTAS_A_GUARDAR.length; i++) {
+    for (let i = 0; i < TAREAS_GUARDADO.length; i++) {
       if (subidas[i] === 'ok') continue;
+      const tarea = TAREAS_GUARDADO[i];
       subidas[i] = 'subiendo';
       dibujarProgreso();
       try {
-        await subirImagen(nombreDelArchivo(i + 1), await imagenConTitulo(VISTAS_A_GUARDAR[i]));
+        const datos = tarea === 'maqueta'
+          ? { contenido: await maquetaComoTexto() }
+          : { imagen: await imagenConTitulo(tarea) };
+        await subirArchivo(nombreDeTarea(tarea, i), datos);
         subidas[i] = 'ok';
       } catch (error) {
         subidas[i] = 'error';
@@ -1886,12 +1923,178 @@
 
     const todasOk = subidas.every((e) => e === 'ok');
     $('#guardar-resultado').textContent = todasOk
-      ? `¡Listo, ${alumno.nombre}! Las 4 vistas de tu maqueta quedaron guardadas.`
-      : 'Algunas vistas no se pudieron guardar. Tocá «Probar otra vez». Si sigue pasando, avisale a tu docente.';
+      ? `¡Listo, ${alumno.nombre}! Tu maqueta quedó guardada. Tu familia la puede ver en «Ver maquetas».`
+      : 'Algunas partes no se pudieron guardar. Tocá «Probar otra vez». Si sigue pasando, avisale a tu docente.';
     $('#btn-guardar-reintentar').classList.toggle('oculto', todasOk);
     $('#btn-guardar-volver').disabled = false;
     $('#ventana-guardar .btn-cerrar').classList.remove('oculto');
     if (todasOk) avisar('☁️ Maqueta guardada en Drive');
+  }
+
+  /* =========================================================
+     15 b. VER MAQUETAS (galería y visor 360° para familias)
+     ========================================================= */
+  let maquetasGuardadas = [];                 // lista que llega desde Drive
+  const filtros = { grado: 'todos', lugar: 'todos' };
+
+  /* Pide datos al script de Google con una consulta GET */
+  async function consultarDrive(parametros) {
+    const url = URL_GUARDADO + '?' + new URLSearchParams(parametros).toString();
+    const respuesta = await fetch(url);
+    const datos = await respuesta.json();
+    if (!datos.ok) throw new Error(datos.error || 'Error de Drive');
+    return datos;
+  }
+
+  function mensajeGaleria(texto, conReintento) {
+    $('#galeria-estado').innerHTML = escaparHTML(texto) + (conReintento
+      ? ' <button id="btn-galeria-reintentar" class="btn btn-celeste" type="button"><span aria-hidden="true">🔁</span> Probar otra vez</button>'
+      : '');
+    const b = $('#btn-galeria-reintentar');
+    if (b) b.addEventListener('click', cargarGaleria);
+  }
+
+  async function abrirGaleria() {
+    mostrarPantalla('pantalla-galeria');
+    await cargarGaleria();
+  }
+
+  async function cargarGaleria() {
+    $('#galeria-lista').innerHTML = '';
+    if (!URL_GUARDADO) {
+      mensajeGaleria('El visualizador todavía no está preparado: falta configurar el guardado en Drive.');
+      return;
+    }
+    mensajeGaleria('Buscando maquetas…');
+    try {
+      const datos = await consultarDrive({ accion: 'listar' });
+      maquetasGuardadas = Array.isArray(datos.maquetas) ? datos.maquetas : [];
+      dibujarFiltros();
+      dibujarGaleria();
+    } catch (error) {
+      mensajeGaleria('No se pudieron traer las maquetas. Revisá la conexión a internet.', true);
+    }
+  }
+
+  function datosDeLugar(id, nombre) {
+    return LUGARES.find((l) => l.id === id) ||
+      Object.assign({}, LUGAR_PROPIO, { nombre: String(nombre || LUGAR_PROPIO.nombre).slice(0, 30) });
+  }
+
+  function dibujarFiltros() {
+    const grados = ['todos'].concat(GRADOS);
+    $('#filtro-grado').innerHTML = grados.map((g) => `
+      <button type="button" class="btn btn-filtro ${filtros.grado === g ? 'activo' : ''}" data-filtro-grado="${escaparHTML(g)}"
+        aria-pressed="${filtros.grado === g}">${g === 'todos' ? 'Todos los grados' : escaparHTML(g)}</button>`).join('');
+
+    // Solo aparecen los lugares que tienen maquetas guardadas
+    const lugares = [...new Set(maquetasGuardadas.map((m) => m.lugar && m.lugar.nombre).filter(Boolean))];
+    if (!lugares.includes(filtros.lugar)) filtros.lugar = 'todos';
+    $('#filtro-lugar').innerHTML = ['todos'].concat(lugares).map((nombre) => {
+      const maqueta = maquetasGuardadas.find((m) => m.lugar && m.lugar.nombre === nombre);
+      const emoji = maqueta ? datosDeLugar(maqueta.lugar.id, nombre).emoji : '🏫';
+      return `<button type="button" class="btn btn-filtro ${filtros.lugar === nombre ? 'activo' : ''}"
+        data-filtro-lugar="${escaparHTML(nombre)}" aria-pressed="${filtros.lugar === nombre}">
+        ${nombre === 'todos' ? 'Todos los lugares' : `<span aria-hidden="true">${emoji}</span> ${escaparHTML(nombre)}`}</button>`;
+    }).join('');
+  }
+
+  function dibujarGaleria() {
+    const visibles = maquetasGuardadas.filter((m) =>
+      (filtros.grado === 'todos' || m.grado === filtros.grado) &&
+      (filtros.lugar === 'todos' || (m.lugar && m.lugar.nombre === filtros.lugar)));
+
+    if (!maquetasGuardadas.length) {
+      mensajeGaleria('Todavía no hay maquetas guardadas.');
+    } else if (!visibles.length) {
+      mensajeGaleria('No hay maquetas con esos filtros. Probá con «Todos».');
+    } else {
+      mensajeGaleria(visibles.length === 1 ? 'Hay 1 maqueta.' : `Hay ${visibles.length} maquetas.`);
+    }
+
+    $('#galeria-lista').innerHTML = visibles.map((m) => {
+      const lugar = datosDeLugar(m.lugar && m.lugar.id, m.lugar && m.lugar.nombre);
+      const miniatura = /^data:image\/jpeg;base64,/.test(m.miniatura || '')
+        ? `<img src="${m.miniatura}" alt="">`
+        : '<span class="sin-miniatura" aria-hidden="true">🏫</span>';
+      const fecha = m.fecha ? new Date(m.fecha).toLocaleDateString('es-AR') : '';
+      return `<button type="button" class="tarjeta-maqueta" data-maqueta="${escaparHTML(m.id)}">
+        ${miniatura}
+        <span class="tarjeta-maqueta-texto">
+          <strong>${escaparHTML(m.alumno || 'Sin nombre')}</strong>
+          <span><span aria-hidden="true">${lugar.emoji}</span> ${escaparHTML(lugar.nombre)}</span>
+          <small>${escaparHTML(m.grado || '')}${fecha ? ' – ' + fecha : ''}${m.cantidad ? ' – ' + Number(m.cantidad) + ' cuerpos' : ''}</small>
+        </span>
+      </button>`;
+    }).join('');
+  }
+
+  /* Revisa cada cuerpo que llega del archivo antes de dibujarlo */
+  function cuerpoValido(c, i) {
+    const numeros = (a, n) => Array.isArray(a) && a.length === n && a.every(Number.isFinite);
+    if (!c || !CUERPOS[c.tipo] || !numeros(c.pos, 3) || !numeros(c.rot, 4) || !numeros(c.esc, 3)) return null;
+    return {
+      id: i + 1,
+      tipo: c.tipo,
+      nombre: String(c.nombre || CUERPOS[c.tipo].nombre).slice(0, 30),
+      color: /^#[0-9a-f]{6}$/i.test(c.color) ? c.color : CUERPOS[c.tipo].color,
+      textura: TEXTURAS.some((t) => t.id === c.textura) ? c.textura : 'lisa',
+      pos: c.pos.map((v) => limitar(v, -30, 60)),
+      rot: c.rot,
+      esc: c.esc.map((v) => limitar(v, 0.03, 10))
+    };
+  }
+
+  async function abrirMaquetaGuardada(id) {
+    mensajeGaleria('Abriendo la maqueta…');
+    try {
+      const { maqueta } = await consultarDrive({ accion: 'leer', id });
+      mostrarEnVisor(maqueta);
+    } catch (error) {
+      mensajeGaleria('No se pudo abrir esa maqueta. Probá otra vez.', false);
+    }
+  }
+
+  /* Muestra una maqueta guardada en la escena 3D, solo para mirar */
+  function mostrarEnVisor(maqueta) {
+    estado.objetos.slice().forEach(quitarMesh);
+    estado.seleccion = [];
+    estado.desafioActivo = null;
+    pilaDeshacer.length = 0;
+    pilaRehacer.length = 0;
+    $('#cartel-desafio').classList.add('oculto');
+
+    const lugar = datosDeLugar(maqueta.lugar && maqueta.lugar.id, maqueta.lugar && maqueta.lugar.nombre);
+    estado.lugar = lugar;
+    cambiarColorPiso(lugar.piso);
+    (Array.isArray(maqueta.cuerpos) ? maqueta.cuerpos.slice(0, 300) : [])
+      .map(cuerpoValido).filter(Boolean).forEach(crearMesh);
+
+    const alumnoTexto = String(maqueta.alumno || '').slice(0, 40);
+    const gradoTexto = String(maqueta.grado || '').slice(0, 10);
+    $('#chip-lugar').textContent = `${lugar.emoji} ${lugar.nombre} – ${alumnoTexto} (${gradoTexto})`;
+
+    // Resumen de los cuerpos usados, para leer mientras se mira la maqueta
+    const datos = datosDeLaEscena();
+    $('#visor-info').innerHTML = `<strong>Maqueta de ${escaparHTML(alumnoTexto)}</strong>
+      <span>Usó ${datos.total} cuerpos:</span>
+      <ul>${ORDEN_CUERPOS.filter((t) => datos.cuenta[t]).map((t) =>
+        `<li>${iconoCuerpo(t)} ${CUERPOS[t].nombre}: ${datos.cuenta[t]}</li>`).join('')}</ul>`;
+
+    document.body.classList.add('modo-visor');
+    cambiarModo('explorar');
+    mostrarPantalla('pantalla-construir');
+    ajustarTamanio();
+    aplicarVista('libre', true);
+    $('#escena-vacia').classList.add('oculto');
+  }
+
+  function cerrarVisor() {
+    document.body.classList.remove('modo-visor');
+    estado.objetos.slice().forEach(quitarMesh);
+    cambiarModo('construir');
+    mostrarPantalla('pantalla-galeria');
+    dibujarGaleria();
   }
 
   function mostrarMiMaqueta() {
@@ -1985,6 +2188,29 @@
 
   function conectarBotones() {
     $('#btn-comenzar').addEventListener('click', () => mostrarPantalla('pantalla-lugares'));
+
+    // Ver maquetas guardadas
+    $('#btn-ver-maquetas').addEventListener('click', abrirGaleria);
+    $('#btn-galeria-volver').addEventListener('click', () => mostrarPantalla('pantalla-bienvenida'));
+    $('#btn-volver-galeria').addEventListener('click', cerrarVisor);
+    $('#filtro-grado').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-filtro-grado]');
+      if (!b) return;
+      filtros.grado = b.dataset.filtroGrado;
+      dibujarFiltros();
+      dibujarGaleria();
+    });
+    $('#filtro-lugar').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-filtro-lugar]');
+      if (!b) return;
+      filtros.lugar = b.dataset.filtroLugar;
+      dibujarFiltros();
+      dibujarGaleria();
+    });
+    $('#galeria-lista').addEventListener('click', (e) => {
+      const t = e.target.closest('[data-maqueta]');
+      if (t) abrirMaquetaGuardada(t.dataset.maqueta);
+    });
 
     $('#btn-deshacer').addEventListener('click', deshacer);
     $('#btn-rehacer').addEventListener('click', rehacer);
