@@ -26,6 +26,9 @@
         <button id="btn-comenzar" class="btn btn-grande btn-verde" type="button">
           <span aria-hidden="true">▶</span> Comenzar
         </button>
+        <button id="btn-ver-maquetas" class="btn btn-ver-maquetas" type="button">
+          <span aria-hidden="true">👀</span> Ver maquetas
+        </button>
       </div>
     </div>
   </section>
@@ -46,6 +49,23 @@
           <button id="btn-propio-ok" class="btn btn-verde" type="button"><span aria-hidden="true">▶</span> Empezar</button>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- PANTALLA: GALERÍA DE MAQUETAS GUARDADAS                -->
+  <!-- ===================================================== -->
+  <section id="pantalla-galeria" class="pantalla" aria-labelledby="titulo-galeria">
+    <div class="galeria-contenido">
+      <div class="galeria-cabecera">
+        <button id="btn-galeria-volver" class="btn" type="button"><span aria-hidden="true">←</span> Volver</button>
+        <h2 id="titulo-galeria">Maquetas de nuestra escuela</h2>
+      </div>
+      <p class="galeria-ayuda">Tocá una maqueta para verla en 3D y girarla para todos lados.</p>
+      <div id="filtro-grado" class="filtros" role="group" aria-label="Filtrar por grado"></div>
+      <div id="filtro-lugar" class="filtros" role="group" aria-label="Filtrar por lugar"></div>
+      <div id="galeria-estado" class="galeria-estado" role="status"></div>
+      <div id="galeria-lista" class="galeria-lista"></div>
     </div>
   </section>
 
@@ -92,6 +112,9 @@
           <span aria-hidden="true">👈</span> Elegí un cuerpo para empezar a construir
         </div>
 
+        <!-- Resumen de la maqueta en el visor -->
+        <div id="visor-info" class="visor-info"></div>
+
         <!-- Mensaje del modo explorar -->
         <div id="ayuda-explorar" class="ayuda-explorar oculto">
           Arrastrá con el dedo o el mouse para mirar tu maqueta desde todos lados
@@ -120,6 +143,7 @@
     <!-- ABAJO: botones generales -->
     <footer class="barra-inferior">
       <div class="grupo-botones">
+        <button id="btn-volver-galeria" class="btn btn-amarillo" type="button"><span aria-hidden="true">←</span> Volver a las maquetas</button>
         <button id="btn-deshacer" class="btn" type="button"><span aria-hidden="true">↶</span> Deshacer</button>
         <button id="btn-rehacer" class="btn" type="button"><span aria-hidden="true">↷</span> Rehacer</button>
       </div>
@@ -248,4 +272,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
