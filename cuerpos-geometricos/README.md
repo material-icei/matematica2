@@ -164,21 +164,3 @@ La carpeta de destino se cambia en `guardar-en-drive.gs`, en la línea `CARPETA_
 
 Los colores generales de la interfaz están en las variables de `:root`, al principio de `styles.css`.
 
-## Comprobaciones realizadas
-
-La app se probó en Chromium, en pantallas de 1366 × 680 (Chromebook) y de 800 px de ancho, sin errores en la consola:
-
-- [x] Los tres archivos están vinculados.
-- [x] Aparecen los seis cuerpos.
-- [x] Los cuerpos se mueven con botones, con el teclado y arrastrándolos. Se pueden apilar.
-- [x] Se rotan en los tres ejes.
-- [x] Cambian de tamaño, tanto en general como solo alto, ancho o grosor.
-- [x] Cambian de color y de textura.
-- [x] Se copian, se borran y se renombran. Se pueden elegir varios juntos.
-- [x] Deshacer y rehacer funcionan.
-- [x] Las cuatro vistas y los controles de cámara funcionan.
-- [x] Los desafíos se detectan y felicitan.
-- [x] La clasificación funciona arrastrando y tocando.
-- [x] Se piden el nombre y el grado, y se envían las 4 vistas por separado con el nombre `grado-lugar-nombre-x.png`. También se guarda el `.json` de la maqueta 360°. Se probó con un servidor simulado, incluyendo un error y el reintento.
-- [x] "Ver maquetas" lista las maquetas guardadas, filtra por grado y lugar, y abre cada una en 3D solo para mirar. Al volver, la app queda lista para construir.
-- [x] No depende de ningún servidor propio.
