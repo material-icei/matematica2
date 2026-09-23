@@ -305,6 +305,18 @@
     costado: { nombre: 'De costado',     theta: Math.PI / 2, phi: 1.38 }
   };
 
+  /* Guardado en Google Drive.
+     URL_GUARDADO: dirección de la "aplicación web" de Google Apps Script
+     que guarda las imágenes en la carpeta de Drive (ver README.md).
+     La carpeta de destino se define dentro de ese script, no acá. */
+  const URL_GUARDADO = '';
+
+  /* Grados que el alumno puede elegir al guardar */
+  const GRADOS = ['2ºA', '2ºB'];
+
+  /* Orden y número de cada vista en el nombre del archivo (…-1.png a …-4.png) */
+  const VISTAS_A_GUARDAR = ['libre', 'arriba', 'frente', 'costado'];
+
   const TAMANIO_BASE = 24;       // lado de la base de la maqueta
   const PASO_MOVER = 0.5;        // cuánto se mueve con cada toque
   const PASO_GIRO = Math.PI / 12; // 15 grados
@@ -1715,7 +1727,6 @@
      15. MOSTRAR MI MAQUETA E IMÁGENES
      ========================================================= */
   let fotosVistas = {};    // imágenes de cada vista
-  let vistaMostrada = 'libre';
 
   /* Saca una foto de la maqueta desde una vista, sin mostrar lo elegido */
   function fotoDeVista(id) {
@@ -1762,56 +1773,126 @@
     });
   }
 
-  /* Arma una imagen con título para descargar (una vista o las 4 juntas) */
-  async function armarLamina(ids) {
-    const imagenes = await Promise.all(ids.map((id) => cargarImagen(fotosVistas[id])));
-    const columnas = ids.length === 1 ? 1 : 2;
-    const filas = Math.ceil(ids.length / columnas);
-    const anchoFoto = ids.length === 1 ? 1600 : 800;
-    const altoFoto = anchoFoto / 1.6;
-    const cabecera = 110, margen = 20, rotulo = ids.length === 1 ? 0 : 48;
-
+  /* Arma la imagen de una vista con un título arriba (grado, lugar, nombre y vista) */
+  async function imagenConTitulo(id) {
+    const foto = await cargarImagen(fotosVistas[id]);
+    const ancho = 1600, alto = 1000, cabecera = 100, margen = 20;
     const lienzo = document.createElement('canvas');
-    lienzo.width = columnas * anchoFoto + (columnas + 1) * margen;
-    lienzo.height = cabecera + filas * (altoFoto + rotulo) + (filas + 1) * margen;
+    lienzo.width = ancho + margen * 2;
+    lienzo.height = cabecera + alto + margen * 2;
     const ctx = lienzo.getContext('2d');
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, lienzo.width, lienzo.height);
-
     ctx.fillStyle = '#1f2a44';
-    ctx.font = '700 52px "Baloo 2", sans-serif';
+    ctx.font = '700 48px "Baloo 2", sans-serif';
     ctx.textBaseline = 'middle';
-    const titulo = ids.length === 1
-      ? `Mi maqueta: ${estado.lugar.nombre} (${VISTAS[ids[0]].nombre.toLowerCase()})`
-      : `Mi maqueta: ${estado.lugar.nombre}`;
+    const titulo = `${alumno.grado} – ${estado.lugar.nombre} – ${alumno.nombre} (${VISTAS[id].nombre.toLowerCase()})`;
     ctx.fillText(titulo, margen + 8, cabecera / 2 + margen / 2);
-
-    imagenes.forEach((img, i) => {
-      const x = margen + (i % columnas) * (anchoFoto + margen);
-      const y = cabecera + margen + Math.floor(i / columnas) * (altoFoto + rotulo + margen);
-      if (rotulo) {
-        ctx.font = '700 34px "Baloo 2", sans-serif';
-        ctx.fillText(VISTAS[ids[i]].nombre, x + 4, y + rotulo / 2);
-      }
-      ctx.drawImage(img, x, y + rotulo, anchoFoto, altoFoto);
-      ctx.strokeStyle = '#1f2a44';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(x, y + rotulo, anchoFoto, altoFoto);
-    });
+    ctx.drawImage(foto, margen, cabecera + margen, ancho, alto);
+    ctx.strokeStyle = '#1f2a44';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(margen, cabecera + margen, ancho, alto);
     return lienzo.toDataURL('image/png');
   }
 
-  function descargar(url, nombreArchivo) {
-    const enlace = document.createElement('a');
-    enlace.href = url;
-    enlace.download = nombreArchivo;
-    document.body.appendChild(enlace);
-    enlace.click();
-    enlace.remove();
+  /* ---------- Guardar las 4 vistas en Google Drive ---------- */
+
+  // Datos del alumno: se recuerdan mientras la página esté abierta
+  const alumno = { nombre: '', grado: '' };
+  let subidas = [];   // estado de cada imagen: 'espera', 'subiendo', 'ok' o 'error'
+
+  /* Quita caracteres que no pueden ir en un nombre de archivo */
+  const limpiarParaArchivo = (texto) => texto.trim().replace(/\s+/g, ' ').replace(/[\\/:*?"<>|#%]/g, '');
+
+  /* Nombre del archivo: "grado-sector-nombre-x.png" */
+  function nombreDelArchivo(numero) {
+    return [alumno.grado, estado.lugar.nombre, alumno.nombre, numero].map((t) => limpiarParaArchivo(String(t))).join('-') + '.png';
   }
 
-  const nombreArchivo = (extra) => `maqueta-${estado.lugar.nombre}-${extra}`
-    .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-') + '.png';
+  function dibujarGrados() {
+    $('#grados').innerHTML = GRADOS.map((g) => `
+      <button type="button" class="btn btn-grado ${alumno.grado === g ? 'elegido' : ''}" role="radio"
+        aria-checked="${alumno.grado === g}" data-grado="${g}">${g}</button>`).join('');
+  }
+
+  function abrirGuardar() {
+    $('#input-alumno').value = alumno.nombre;
+    $('#guardar-aviso').textContent = '';
+    $('#guardar-formulario').classList.remove('oculto');
+    $('#guardar-progreso').classList.add('oculto');
+    $('#ventana-guardar .btn-cerrar').classList.remove('oculto');
+    dibujarGrados();
+    abrirVentana('ventana-guardar');
+    $('#input-alumno').focus();
+  }
+
+  function dibujarProgreso() {
+    const iconos = { espera: '⏳', subiendo: '☁️', ok: '✅', error: '⚠️' };
+    const textos = { espera: 'Esperando…', subiendo: 'Guardando…', ok: 'Guardada', error: 'No se guardó' };
+    $('#lista-progreso').innerHTML = VISTAS_A_GUARDAR.map((id, i) => `
+      <li class="${subidas[i]}">
+        <span class="icono-progreso" aria-hidden="true">${iconos[subidas[i]]}</span>
+        <span><strong>${VISTAS[id].nombre}</strong>: ${textos[subidas[i]]}
+          <small>${escaparHTML(nombreDelArchivo(i + 1))}</small></span>
+      </li>`).join('');
+  }
+
+  /* Envía una imagen al script de Google (Apps Script) que la guarda en la carpeta */
+  async function subirImagen(nombreArchivo, imagen) {
+    const respuesta = await fetch(URL_GUARDADO, {
+      method: 'POST',
+      // "text/plain" evita la consulta previa del navegador, que Apps Script no acepta
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ nombreArchivo, imagen })
+    });
+    const datos = await respuesta.json();
+    if (!datos.ok) throw new Error(datos.error || 'No se pudo guardar');
+  }
+
+  /* Revisa los datos del alumno y empieza a guardar */
+  function confirmarGuardado() {
+    const nombre = $('#input-alumno').value.trim().replace(/\s+/g, ' ');
+    const aviso = $('#guardar-aviso');
+    if (!nombre) { aviso.textContent = '✏️ Escribí tu nombre para guardar.'; $('#input-alumno').focus(); return; }
+    if (!alumno.grado) { aviso.textContent = '👆 Tocá tu grado.'; return; }
+    if (!URL_GUARDADO) { aviso.textContent = 'El guardado en Drive todavía no está preparado. Avisale a tu docente.'; return; }
+    if (!navigator.onLine) { aviso.textContent = 'No hay internet en este momento. Probá de nuevo en un ratito.'; return; }
+    alumno.nombre = nombre.slice(0, 40);
+    subidas = VISTAS_A_GUARDAR.map(() => 'espera');
+    $('#guardar-formulario').classList.add('oculto');
+    $('#guardar-progreso').classList.remove('oculto');
+    guardarVistasEnDrive();
+  }
+
+  /* Guarda una por una las vistas que todavía no se guardaron */
+  async function guardarVistasEnDrive() {
+    $('#ventana-guardar .btn-cerrar').classList.add('oculto');
+    $('#btn-guardar-reintentar').classList.add('oculto');
+    $('#btn-guardar-volver').disabled = true;
+    $('#guardar-resultado').textContent = 'Guardando tu maqueta… no cierres esta ventana.';
+
+    for (let i = 0; i < VISTAS_A_GUARDAR.length; i++) {
+      if (subidas[i] === 'ok') continue;
+      subidas[i] = 'subiendo';
+      dibujarProgreso();
+      try {
+        await subirImagen(nombreDelArchivo(i + 1), await imagenConTitulo(VISTAS_A_GUARDAR[i]));
+        subidas[i] = 'ok';
+      } catch (error) {
+        subidas[i] = 'error';
+      }
+      dibujarProgreso();
+    }
+
+    const todasOk = subidas.every((e) => e === 'ok');
+    $('#guardar-resultado').textContent = todasOk
+      ? `¡Listo, ${alumno.nombre}! Las 4 vistas de tu maqueta quedaron guardadas.`
+      : 'Algunas vistas no se pudieron guardar. Tocá «Probar otra vez». Si sigue pasando, avisale a tu docente.';
+    $('#btn-guardar-reintentar').classList.toggle('oculto', todasOk);
+    $('#btn-guardar-volver').disabled = false;
+    $('#ventana-guardar .btn-cerrar').classList.remove('oculto');
+    if (todasOk) avisar('☁️ Maqueta guardada en Drive');
+  }
 
   function mostrarMiMaqueta() {
     if (!estado.objetos.length) {
@@ -1820,7 +1901,6 @@
     }
     fotosVistas = {};
     Object.keys(VISTAS).forEach((id) => { fotosVistas[id] = fotoDeVista(id); });
-    vistaMostrada = 'libre';
 
     const datos = datosDeLaEscena();
     $('#titulo-maqueta').textContent = `${estado.lugar.emoji} ${estado.lugar.nombre}`;
@@ -1843,7 +1923,6 @@
   }
 
   function elegirFotoGrande(id) {
-    vistaMostrada = id;
     $('#maqueta-imagen-grande').src = fotosVistas[id];
     $('#maqueta-imagen-grande').alt = `Mi maqueta: ${VISTAS[id].nombre}`;
     $$('.miniatura').forEach((m) => {
@@ -1941,14 +2020,18 @@
       const m = e.target.closest('[data-vista-foto]');
       if (m) elegirFotoGrande(m.dataset.vistaFoto);
     });
-    $('#btn-descargar-vista').addEventListener('click', async () => {
-      descargar(await armarLamina([vistaMostrada]), nombreArchivo(VISTAS[vistaMostrada].nombre));
-      avisar('⬇ Imagen descargada');
+    $('#btn-guardar-drive').addEventListener('click', abrirGuardar);
+    $('#grados').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-grado]');
+      if (!b) return;
+      alumno.grado = b.dataset.grado;
+      $('#guardar-aviso').textContent = '';
+      dibujarGrados();
     });
-    $('#btn-descargar-todas').addEventListener('click', async () => {
-      descargar(await armarLamina(Object.keys(VISTAS)), nombreArchivo('4-vistas'));
-      avisar('⬇ Imagen con las 4 vistas descargada');
-    });
+    $('#input-alumno').addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmarGuardado(); });
+    $('#btn-guardar-confirmar').addEventListener('click', confirmarGuardado);
+    $('#btn-guardar-reintentar').addEventListener('click', guardarVistasEnDrive);
+    $('#btn-guardar-volver').addEventListener('click', () => abrirVentana('ventana-maqueta'));
 
     // Botones "cerrar" y clic en el fondo oscuro
     $$('[data-cerrar]').forEach((b) => b.addEventListener('click', () => b.closest('.ventana').classList.add('oculto')));
