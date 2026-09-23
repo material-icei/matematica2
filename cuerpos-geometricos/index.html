@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Construimos nuestra escuela</title>
+
+  <!-- Tipografías: Baloo 2 para títulos y Andika (pensada para lectores que empiezan) para textos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ===================================================== -->
+  <!-- PANTALLA 1: BIENVENIDA                                 -->
+  <!-- ===================================================== -->
+  <section id="pantalla-bienvenida" class="pantalla activa" aria-labelledby="titulo-bienvenida">
+    <div class="bienvenida-contenido">
+      <div class="bienvenida-dibujo" id="dibujo-escuela" aria-hidden="true"></div>
+      <div class="bienvenida-texto">
+        <h1 id="titulo-bienvenida">¡Construyamos nuestra escuela!</h1>
+        <p class="bienvenida-consigna">Elegí un lugar de la escuela y construí una maqueta usando cuerpos geométricos.</p>
+        <button id="btn-comenzar" class="btn btn-grande btn-verde" type="button">
+          <span aria-hidden="true">▶</span> Comenzar
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- PANTALLA 2: ELEGIR EL LUGAR                            -->
+  <!-- ===================================================== -->
+  <section id="pantalla-lugares" class="pantalla" aria-labelledby="titulo-lugares">
+    <div class="lugares-contenido">
+      <h2 id="titulo-lugares">¿Qué lugar querés construir?</h2>
+      <div id="grilla-lugares" class="grilla-lugares"></div>
+
+      <!-- Aparece al elegir "Mi propio espacio" -->
+      <div id="form-propio" class="form-propio oculto">
+        <label for="input-propio">¿Cómo se llama tu espacio?</label>
+        <div class="form-propio-fila">
+          <input id="input-propio" type="text" maxlength="30" placeholder="Por ejemplo: Aula de arte">
+          <button id="btn-propio-ok" class="btn btn-verde" type="button"><span aria-hidden="true">▶</span> Empezar</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- PANTALLA 3: CONSTRUCCIÓN                               -->
+  <!-- ===================================================== -->
+  <section id="pantalla-construir" class="pantalla" aria-label="Construcción de la maqueta">
+
+    <!-- ARRIBA: título y botones de actividades -->
+    <header class="barra-superior">
+      <div class="titulo-app">
+        <span class="titulo-texto">Construimos nuestra escuela</span>
+        <span id="chip-lugar" class="chip-lugar"></span>
+      </div>
+      <nav class="acciones-superiores" aria-label="Actividades">
+        <button id="btn-desafios" class="btn btn-amarillo" type="button"><span aria-hidden="true">🏆</span> Desafíos</button>
+        <button id="btn-clasificar" class="btn btn-celeste" type="button"><span aria-hidden="true">⚽</span> ¿Rueda o no rueda?</button>
+        <button id="btn-mostrar" class="btn btn-violeta" type="button"><span aria-hidden="true">🖼️</span> Mostrar mi maqueta</button>
+      </nav>
+    </header>
+
+    <main class="zona-trabajo">
+
+      <!-- IZQUIERDA: cuerpos geométricos -->
+      <aside class="panel panel-izquierdo" aria-labelledby="titulo-cuerpos">
+        <h3 id="titulo-cuerpos" class="panel-titulo">Cuerpos</h3>
+        <p class="panel-ayuda">Tocá uno para agregarlo</p>
+        <div id="lista-cuerpos" class="lista-cuerpos"></div>
+      </aside>
+
+      <!-- CENTRO: escena 3D -->
+      <div class="escena" id="escena">
+        <div id="contenedor-3d" class="contenedor-3d"></div>
+
+        <!-- Consigna del desafío activo -->
+        <div id="cartel-desafio" class="cartel-desafio oculto" role="status">
+          <span aria-hidden="true">🏆</span>
+          <span id="cartel-desafio-texto"></span>
+          <button id="btn-cerrar-desafio" class="btn-mini" type="button" aria-label="Quitar desafío">✕</button>
+        </div>
+
+        <!-- Mensaje cuando la escena está vacía -->
+        <div id="escena-vacia" class="escena-vacia">
+          <span aria-hidden="true">👈</span> Elegí un cuerpo para empezar a construir
+        </div>
+
+        <!-- Mensaje del modo explorar -->
+        <div id="ayuda-explorar" class="ayuda-explorar oculto">
+          Arrastrá con el dedo o el mouse para mirar tu maqueta desde todos lados
+        </div>
+
+        <!-- Controles de la cámara -->
+        <div class="control-camara" aria-label="Mover la cámara">
+          <button class="btn-cam" data-cam="girar-izq" type="button" title="Girar a la izquierda"><span aria-hidden="true">↺</span><small>Girar</small></button>
+          <button class="btn-cam" data-cam="arriba" type="button" title="Mirar más desde arriba"><span aria-hidden="true">⬆</span><small>Arriba</small></button>
+          <button class="btn-cam" data-cam="girar-der" type="button" title="Girar a la derecha"><span aria-hidden="true">↻</span><small>Girar</small></button>
+          <button class="btn-cam" data-cam="izquierda" type="button" title="Mover a la izquierda"><span aria-hidden="true">←</span><small>Mover</small></button>
+          <button class="btn-cam" data-cam="abajo" type="button" title="Mirar más desde abajo"><span aria-hidden="true">⬇</span><small>Abajo</small></button>
+          <button class="btn-cam" data-cam="derecha" type="button" title="Mover a la derecha"><span aria-hidden="true">→</span><small>Mover</small></button>
+          <button class="btn-cam" data-cam="acercar" type="button" title="Acercar"><span aria-hidden="true">＋</span><small>Acercar</small></button>
+          <button class="btn-cam" data-cam="centrar" type="button" title="Volver al centro"><span aria-hidden="true">◎</span><small>Centrar</small></button>
+          <button class="btn-cam" data-cam="alejar" type="button" title="Alejar"><span aria-hidden="true">－</span><small>Alejar</small></button>
+        </div>
+      </div>
+
+      <!-- DERECHA: controles del cuerpo elegido -->
+      <aside class="panel panel-derecho" id="panel-derecho" aria-live="polite">
+        <!-- Se completa desde script.js -->
+      </aside>
+    </main>
+
+    <!-- ABAJO: botones generales -->
+    <footer class="barra-inferior">
+      <div class="grupo-botones">
+        <button id="btn-deshacer" class="btn" type="button"><span aria-hidden="true">↶</span> Deshacer</button>
+        <button id="btn-rehacer" class="btn" type="button"><span aria-hidden="true">↷</span> Rehacer</button>
+      </div>
+      <div class="grupo-botones grupo-vistas" role="group" aria-label="Vistas">
+        <button class="btn btn-vista activa" data-vista="libre" type="button"><span aria-hidden="true">🧊</span> Vista 3D</button>
+        <button class="btn btn-vista" data-vista="arriba" type="button"><span aria-hidden="true">🐦</span> Desde arriba</button>
+        <button class="btn btn-vista" data-vista="frente" type="button"><span aria-hidden="true">👀</span> De frente</button>
+        <button class="btn btn-vista" data-vista="costado" type="button"><span aria-hidden="true">👂</span> De costado</button>
+      </div>
+      <div class="grupo-botones">
+        <button id="btn-modo" class="btn btn-celeste" type="button"><span aria-hidden="true">🔭</span> Explorar</button>
+        <button id="btn-nuevo" class="btn btn-rojo" type="button"><span aria-hidden="true">✨</span> Nuevo proyecto</button>
+      </div>
+    </footer>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- VENTANAS DENTRO DE LA APP                              -->
+  <!-- ===================================================== -->
+
+  <!-- Desafíos geométricos -->
+  <div id="ventana-desafios" class="ventana oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-desafios">
+    <div class="ventana-caja">
+      <button class="btn-cerrar" data-cerrar type="button" aria-label="Cerrar">✕</button>
+      <h2 id="titulo-desafios">Desafíos geométricos</h2>
+      <p class="ventana-sub">Elegí un desafío y construilo en tu maqueta.</p>
+      <div id="lista-desafios" class="lista-desafios"></div>
+    </div>
+  </div>
+
+  <!-- Clasificación: ¿rueda o no rueda? -->
+  <div id="ventana-clasificar" class="ventana oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-clasificar">
+    <div class="ventana-caja ventana-ancha">
+      <button class="btn-cerrar" data-cerrar type="button" aria-label="Cerrar">✕</button>
+      <h2 id="titulo-clasificar">¿Rueda o no rueda?</h2>
+      <p class="ventana-sub">Arrastrá cada cuerpo a su grupo. También podés tocar el cuerpo y después tocar el grupo.</p>
+      <div id="bandeja-clasificar" class="bandeja-clasificar"></div>
+      <div class="grupos-clasificar">
+        <div class="grupo-clasificar" data-grupo="rueda">
+          <h3><span aria-hidden="true">🔄</span> Ruedan</h3>
+          <div class="grupo-cuerpos"></div>
+        </div>
+        <div class="grupo-clasificar" data-grupo="norueda">
+          <h3><span aria-hidden="true">🧱</span> No ruedan</h3>
+          <div class="grupo-cuerpos"></div>
+        </div>
+      </div>
+      <p id="mensaje-clasificar" class="mensaje-clasificar" role="status"></p>
+      <button id="btn-clasificar-otra" class="btn btn-celeste oculto" type="button"><span aria-hidden="true">🔁</span> Jugar otra vez</button>
+    </div>
+  </div>
+
+  <!-- Mostrar mi maqueta -->
+  <div id="ventana-maqueta" class="ventana oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-maqueta">
+    <div class="ventana-caja ventana-maqueta">
+      <button class="btn-cerrar" data-cerrar type="button" aria-label="Cerrar">✕</button>
+      <div class="maqueta-imagenes">
+        <img id="maqueta-imagen-grande" class="maqueta-imagen-grande" alt="Vista de mi maqueta">
+        <div id="maqueta-miniaturas" class="maqueta-miniaturas" role="group" aria-label="Elegir vista"></div>
+      </div>
+      <div class="maqueta-datos">
+        <h2 id="titulo-maqueta"></h2>
+        <p id="maqueta-total" class="maqueta-total"></p>
+        <ul id="maqueta-lista" class="maqueta-lista"></ul>
+        <p class="maqueta-pregunta"><span aria-hidden="true">💬</span> Contale a tu grupo: ¿qué cuerpos usaste y qué parte de la escuela representa cada uno?</p>
+        <div class="maqueta-botones">
+          <button id="btn-descargar-vista" class="btn btn-verde" type="button"><span aria-hidden="true">⬇</span> Descargar imagen de mi maqueta</button>
+          <button id="btn-descargar-todas" class="btn" type="button"><span aria-hidden="true">🖼️</span> Descargar las 4 vistas</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmación para empezar de nuevo -->
+  <div id="ventana-confirmar" class="ventana oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-confirmar">
+    <div class="ventana-caja ventana-chica">
+      <h2 id="titulo-confirmar">¿Empezar una maqueta nueva?</h2>
+      <p class="ventana-sub">La maqueta que estás haciendo se va a borrar. Si querés guardarla, primero descargá su imagen.</p>
+      <div class="confirmar-botones">
+        <button id="btn-confirmar-si" class="btn btn-rojo" type="button"><span aria-hidden="true">✨</span> Sí, empezar otra</button>
+        <button id="btn-confirmar-no" class="btn" type="button"><span aria-hidden="true">↩</span> No, seguir con esta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Felicitación -->
+  <div id="ventana-felicitacion" class="ventana oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-felicitacion">
+    <div class="ventana-caja ventana-chica felicitacion">
+      <div class="felicitacion-estrellas" aria-hidden="true">⭐ ⭐ ⭐</div>
+      <h2 id="titulo-felicitacion">¡Desafío cumplido!</h2>
+      <p id="texto-felicitacion" class="ventana-sub"></p>
+      <button class="btn btn-verde" data-cerrar type="button"><span aria-hidden="true">👍</span> Seguir construyendo</button>
+    </div>
+  </div>
+
+  <!-- Avisos cortos -->
+  <div id="aviso" class="aviso" role="status" aria-live="polite"></div>
+
+  <!-- Three.js desde CDN (versión clásica: funciona también abriendo el archivo con doble clic) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
