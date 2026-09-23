@@ -879,6 +879,58 @@ body.modo-explorar .btn-cam small { font-size: 13px; }
 }
 .maqueta-botones { display: flex; flex-direction: column; gap: 10px; }
 
+/* Guardar en Drive */
+.ventana-guardar { text-align: left; }
+.ventana-guardar h2 { padding-right: 44px; margin-bottom: 12px; }
+#guardar-formulario { display: flex; flex-direction: column; gap: 8px; }
+.etiqueta-campo {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  font-size: 22px;
+  margin: 4px 0 0;
+}
+.campo-alumno { font-size: 22px; padding: 10px 14px; border-width: 3px; }
+.grados { display: flex; gap: 12px; }
+.btn-grado { flex: 1; font-size: 26px; min-height: 64px; }
+.btn-grado.elegido { background: var(--amarillo); }
+.btn-grado.elegido::before { content: "✓"; }
+.guardar-aviso {
+  min-height: 24px;
+  margin: 0;
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  font-size: 18px;
+}
+.lista-progreso {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lista-progreso li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 2px solid var(--tinta);
+  border-radius: 12px;
+  padding: 6px 10px;
+  background: var(--papel);
+  font-size: 17px;
+}
+.lista-progreso li.ok { background: var(--verde-claro); }
+.lista-progreso li.error { background: var(--amarillo-claro); }
+.lista-progreso small { display: block; font-size: 13px; color: var(--tinta-suave); overflow-wrap: anywhere; }
+.icono-progreso { font-size: 24px; }
+.guardar-resultado {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  font-size: 19px;
+  line-height: 1.3;
+  margin: 0 0 12px;
+}
+
 /* Confirmar y felicitar */
 .confirmar-botones { display: flex; flex-direction: column; gap: 10px; }
 .felicitacion { background: var(--verde-claro); }
