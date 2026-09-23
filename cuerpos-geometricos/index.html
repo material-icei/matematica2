@@ -186,8 +186,33 @@
         <ul id="maqueta-lista" class="maqueta-lista"></ul>
         <p class="maqueta-pregunta"><span aria-hidden="true">💬</span> Contale a tu grupo: ¿qué cuerpos usaste y qué parte de la escuela representa cada uno?</p>
         <div class="maqueta-botones">
-          <button id="btn-descargar-vista" class="btn btn-verde" type="button"><span aria-hidden="true">⬇</span> Descargar imagen de mi maqueta</button>
-          <button id="btn-descargar-todas" class="btn" type="button"><span aria-hidden="true">🖼️</span> Descargar las 4 vistas</button>
+          <button id="btn-guardar-drive" class="btn btn-verde" type="button"><span aria-hidden="true">☁️</span> Guardar mi maqueta en Drive</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Guardar en Drive: nombre, grado y progreso -->
+  <div id="ventana-guardar" class="ventana oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-guardar">
+    <div class="ventana-caja ventana-chica ventana-guardar">
+      <button class="btn-cerrar" data-cerrar type="button" aria-label="Cerrar">✕</button>
+      <h2 id="titulo-guardar">Guardar mi maqueta</h2>
+
+      <div id="guardar-formulario">
+        <label for="input-alumno" class="etiqueta-campo">¿Cómo te llamás?</label>
+        <input id="input-alumno" class="campo-nombre campo-alumno" type="text" maxlength="40" autocomplete="off" placeholder="Tu nombre">
+        <p id="etiqueta-grado" class="etiqueta-campo">¿En qué grado estás?</p>
+        <div id="grados" class="grados" role="radiogroup" aria-labelledby="etiqueta-grado"></div>
+        <p id="guardar-aviso" class="guardar-aviso" role="status"></p>
+        <button id="btn-guardar-confirmar" class="btn btn-verde" type="button"><span aria-hidden="true">☁️</span> Guardar las 4 vistas</button>
+      </div>
+
+      <div id="guardar-progreso" class="oculto">
+        <ul id="lista-progreso" class="lista-progreso"></ul>
+        <p id="guardar-resultado" class="guardar-resultado" role="status"></p>
+        <div class="confirmar-botones">
+          <button id="btn-guardar-reintentar" class="btn btn-celeste oculto" type="button"><span aria-hidden="true">🔁</span> Probar otra vez</button>
+          <button id="btn-guardar-volver" class="btn" type="button"><span aria-hidden="true">↩</span> Volver a mi maqueta</button>
         </div>
       </div>
     </div>
@@ -197,7 +222,7 @@
   <div id="ventana-confirmar" class="ventana oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-confirmar">
     <div class="ventana-caja ventana-chica">
       <h2 id="titulo-confirmar">¿Empezar una maqueta nueva?</h2>
-      <p class="ventana-sub">La maqueta que estás haciendo se va a borrar. Si querés guardarla, primero descargá su imagen.</p>
+      <p class="ventana-sub">La maqueta que estás haciendo se va a borrar. Si querés guardarla, primero tocá «Mostrar mi maqueta» y guardala en Drive.</p>
       <div class="confirmar-botones">
         <button id="btn-confirmar-si" class="btn btn-rojo" type="button"><span aria-hidden="true">✨</span> Sí, empezar otra</button>
         <button id="btn-confirmar-no" class="btn" type="button"><span aria-hidden="true">↩</span> No, seguir con esta</button>
@@ -223,3 +248,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+
