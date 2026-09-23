@@ -12,8 +12,9 @@ Está basada en el proyecto de la docente sobre el reconocimiento del entorno ce
 | `styles.css` | Colores, tipografías y diseño |
 | `script.js` | Toda la lógica: escena 3D, cuerpos, desafíos, clasificación e imágenes |
 | `README.md` | Este documento |
+| `guardar-en-drive.gs` | Código para Google Apps Script que guarda las imágenes en Drive. **No se sube a GitHub** |
 
-No usa servidor, base de datos ni frameworks. La parte 3D usa **Three.js (versión 0.147)** cargado desde un CDN, y las tipografías vienen de Google Fonts.
+No usa servidor propio, base de datos ni frameworks. La parte 3D usa **Three.js (versión 0.147)** cargado desde un CDN, y las tipografías vienen de Google Fonts.
 
 > **Importante:** las computadoras necesitan internet para cargar Three.js. Si no hay conexión, la app muestra un aviso en lugar de la escena.
 
@@ -43,7 +44,7 @@ Hacé doble clic en `index.html` para abrirla en Google Chrome. Funciona tambié
 4. **Explorar:** se esconden los paneles de edición y la maqueta se recorre con controles más grandes.
 5. **Desafíos geométricos:** hay siete consignas. Cuando se cumple una, aparece un mensaje positivo. El botón "¡Terminé!" da una pista amable si todavía falta algo. No hay mensajes negativos ni penalizaciones.
 6. **¿Rueda o no rueda?:** se arrastra cada cuerpo al grupo correcto, o se toca el cuerpo y después el grupo. Si se equivoca, la ficha vuelve con una pregunta para pensar. Al terminar aparece una explicación sencilla.
-7. **Mostrar mi maqueta:** muestra el nombre del lugar, cuántos cuerpos se usaron y de qué tipos, para qué se usó cada uno y las cuatro vistas. Hay dos botones de descarga: uno baja la vista elegida y el otro baja **una sola imagen con las 4 vistas**. Cada imagen incluye un título.
+7. **Mostrar mi maqueta:** muestra el nombre del lugar, cuántos cuerpos se usaron y de qué tipos, para qué se usó cada uno y las cuatro vistas. El botón **"Guardar mi maqueta en Drive"** pide el nombre del alumno y el grado (2ºA o 2ºB). Después guarda las 4 vistas como imágenes separadas en la carpeta de Drive del proyecto. Cada imagen lleva un título con el grado, el lugar, el nombre y la vista.
 
 ### Detalles pensados para 2.º grado
 
@@ -65,9 +66,55 @@ Hacé doble clic en `index.html` para abrirla en Google Chrome. Funciona tambié
 | Shift + clic | Elegir varios cuerpos |
 | Esc | Cerrar una ventana o dejar de elegir |
 
-## Sobre guardar el trabajo
+## Guardar las maquetas en Google Drive
 
-Por decisión del proyecto, la maqueta **no se guarda** en la computadora. El trabajo se conserva **descargando las imágenes** desde "Mostrar mi maqueta". Si se cierra o se recarga la página, se empieza de nuevo. Antes de borrar la maqueta con "Nuevo proyecto", la app pide confirmación y recuerda descargar la imagen.
+### Cómo se llaman los archivos
+
+Cada maqueta genera 4 archivos PNG con el formato `grado-lugar-nombre-número.png`. Por ejemplo:
+
+| Número | Vista | Ejemplo |
+|---|---|---|
+| 1 | Vista 3D | `2ºB-Biblioteca-Juana Pérez-1.png` |
+| 2 | Desde arriba | `2ºB-Biblioteca-Juana Pérez-2.png` |
+| 3 | De frente | `2ºB-Biblioteca-Juana Pérez-3.png` |
+| 4 | De costado | `2ºB-Biblioteca-Juana Pérez-4.png` |
+
+Si una imagen no se puede guardar (por ejemplo, porque se cortó internet), la app lo muestra y ofrece "Probar otra vez". Al reintentar, solo vuelve a enviar las que faltaron. El nombre y el grado se recuerdan mientras la página esté abierta, así el alumno no tiene que volver a escribirlos.
+
+Si un alumno guarda dos veces la misma maqueta, Drive guarda las dos copias con el mismo nombre; no se borra nada.
+
+### Por qué hace falta un paso extra
+
+Una página publicada en GitHub Pages no puede escribir sola en una carpeta de Drive: Google exige permiso de una cuenta con acceso a esa carpeta. La solución es un pequeño programa de **Google Apps Script** que funciona con la cuenta de la docente. La app le manda las imágenes y el script las guarda en la carpeta. Los alumnos no necesitan iniciar sesión con Google.
+
+### Configuración (se hace una sola vez)
+
+La tiene que hacer una persona con permiso de **edición** en la carpeta de Drive.
+
+1. Entrá a [script.google.com](https://script.google.com) con esa cuenta y tocá **Nuevo proyecto**.
+2. Borrá el contenido que aparece, pegá todo el archivo `guardar-en-drive.gs` y guardá. Podés ponerle de nombre al proyecto "Guardado de maquetas".
+3. Tocá **Implementar → Nueva implementación**. En el engranaje, elegí **Aplicación web** y completá:
+   - **Ejecutar como:** Yo.
+   - **Quién tiene acceso:** Cualquier persona.
+4. Tocá **Implementar**. Google pide autorizar el acceso a Drive: aceptá. Si aparece "Google no verificó esta app", entrá en *Configuración avanzada → Ir a Guardado de maquetas*. Es normal, porque el script es tuyo.
+5. Copiá la **URL de la aplicación web**, que termina en `/exec`.
+6. En `script.js`, al principio de la sección de configuración, pegala entre las comillas:
+   ```js
+   const URL_GUARDADO = 'https://script.google.com/macros/s/.../exec';
+   ```
+7. Subí el `script.js` actualizado a GitHub.
+
+Para comprobar que funciona, abrí la URL `/exec` en el navegador: tiene que mostrar `"ok": true`.
+
+Si más adelante cambiás el código del script, usá **Implementar → Gestionar implementaciones → Editar → Nueva versión**. Así la URL sigue siendo la misma.
+
+Mientras `URL_GUARDADO` esté vacía, la app avisa: "El guardado en Drive todavía no está preparado. Avisale a tu docente".
+
+### Privacidad
+
+La dirección `/exec` permite subir imágenes a la carpeta, pero no permite ver ni borrar lo que ya está guardado. Conviene no compartirla fuera de la escuela. Se recomienda que los alumnos escriban solo su **nombre**, sin apellido.
+
+Aparte del guardado en Drive, la maqueta no queda guardada en la computadora. Si se cierra o se recarga la página, se empieza de nuevo. Antes de borrarla con "Nuevo proyecto", la app pide confirmación y recuerda guardarla.
 
 ## Cómo modificar la app (para docentes)
 
@@ -92,6 +139,11 @@ Todo lo que se puede cambiar está al principio de `script.js`, en la sección *
   ```
   En `d.cuenta` está cuántos cuerpos hay de cada tipo (`prisma`, `cubo`, `cilindro`, `esfera`, `cono`, `piramide`), y en `d.tipos` cuántos tipos distintos se usaron.
 - **`MENSAJE_LOGRO`**: el mensaje que aparece al cumplir un desafío.
+- **`URL_GUARDADO`**: la dirección del script de Google que guarda en Drive.
+- **`GRADOS`**: las divisiones que aparecen al guardar. Si hace falta, se agrega una, por ejemplo `'2ºC'`.
+- **`VISTAS_A_GUARDAR`**: el orden de las vistas, que define los números 1 a 4 del nombre del archivo.
+
+La carpeta de destino se cambia en `guardar-en-drive.gs`, en la línea `CARPETA_ID`. Después hay que publicar una nueva versión del script.
 
 Los colores generales de la interfaz están en las variables de `:root`, al principio de `styles.css`.
 
@@ -110,5 +162,5 @@ La app se probó en Chromium, en pantallas de 1366 × 680 (Chromebook) y de 800 
 - [x] Las cuatro vistas y los controles de cámara funcionan.
 - [x] Los desafíos se detectan y felicitan.
 - [x] La clasificación funciona arrastrando y tocando.
-- [x] Se descargan imágenes de una vista o de las 4 vistas juntas.
+- [x] Se piden el nombre y el grado, y se envían las 4 vistas por separado con el nombre `grado-lugar-nombre-x.png`. Se probó con un servidor simulado, incluyendo un error y el reintento.
 - [x] No depende de ningún servidor propio.
