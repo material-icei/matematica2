@@ -931,6 +931,87 @@ body.modo-explorar .btn-cam small { font-size: 13px; }
   margin: 0 0 12px;
 }
 
+/* Galería de maquetas guardadas */
+.btn-ver-maquetas { margin-left: 12px; min-height: 70px; font-size: 22px; border-radius: 20px; }
+#pantalla-galeria { justify-content: center; padding: 24px; overflow-y: auto; }
+.galeria-contenido { width: 100%; max-width: 1100px; }
+.galeria-cabecera { display: flex; align-items: center; gap: 16px; margin-bottom: 4px; }
+#titulo-galeria { font-size: clamp(28px, 3.5vw, 42px); }
+.galeria-ayuda { margin: 0 0 12px; font-size: 18px; }
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.btn-filtro { min-height: 44px; font-size: 16px; padding: 4px 14px; border-width: 2px; box-shadow: 0 3px 0 var(--tinta); }
+.btn-filtro.activo { background: var(--amarillo); }
+.galeria-estado {
+  font-family: var(--fuente-titulos);
+  font-weight: 700;
+  font-size: 19px;
+  margin: 6px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.galeria-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 16px;
+  padding-bottom: 24px;
+}
+.tarjeta-maqueta {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 0;
+  overflow: hidden;
+  background: var(--blanco);
+  border: var(--borde);
+  border-radius: 18px;
+  box-shadow: 0 5px 0 var(--tinta);
+  cursor: pointer;
+  color: var(--tinta);
+  font-family: var(--fuente-texto);
+}
+.tarjeta-maqueta:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--tinta); }
+.tarjeta-maqueta:focus-visible { outline: 4px solid var(--celeste); outline-offset: 3px; }
+.tarjeta-maqueta img,
+.sin-miniatura {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+  border-bottom: var(--borde);
+  background: #cfe8fa;
+}
+.sin-miniatura { display: flex; align-items: center; justify-content: center; font-size: 48px; }
+.tarjeta-maqueta-texto { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px 10px; font-size: 16px; }
+.tarjeta-maqueta-texto strong { font-family: var(--fuente-titulos); font-size: 22px; line-height: 1.1; }
+.tarjeta-maqueta-texto small { color: var(--tinta-suave); font-size: 14px; }
+
+/* Visor: la escena solo para mirar */
+#btn-volver-galeria,
+.visor-info { display: none; }
+body.modo-visor #btn-volver-galeria { display: inline-flex; }
+body.modo-visor .acciones-superiores,
+body.modo-visor #btn-modo,
+body.modo-visor #btn-nuevo,
+body.modo-visor #ayuda-explorar { display: none; }
+body.modo-visor .visor-info {
+  display: block;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  max-width: 260px;
+  background: rgba(255, 255, 255, .92);
+  border: 2px solid var(--tinta);
+  border-radius: 14px;
+  padding: 8px 12px;
+  font-size: 15px;
+}
+.visor-info strong { display: block; font-family: var(--fuente-titulos); font-size: 19px; }
+.visor-info ul { list-style: none; margin: 4px 0 0; padding: 0; }
+.visor-info li { display: flex; align-items: center; gap: 6px; }
+.visor-info svg { width: 24px; height: 24px; }
+
 /* Confirmar y felicitar */
 .confirmar-botones { display: flex; flex-direction: column; gap: 10px; }
 .felicitacion { background: var(--verde-claro); }
@@ -997,6 +1078,7 @@ body.modo-explorar .btn-cam small { font-size: 13px; }
   .btn-cam { width: 46px; height: 44px; }
   .bienvenida-contenido { flex-direction: column; text-align: center; gap: 16px; }
   .bienvenida-consigna { margin-left: auto; margin-right: auto; }
+  .btn-ver-maquetas { margin: 12px 0 0; }
   .ventana-maqueta { grid-template-columns: 1fr; }
   .grupos-clasificar { grid-template-columns: 1fr; }
 }
