@@ -353,7 +353,7 @@
      URL_GUARDADO: dirección de la "aplicación web" de Google Apps Script
      que guarda las imágenes en la carpeta de Drive (ver README.md).
      La carpeta de destino se define dentro de ese script, no acá. */
-  const URL_GUARDADO = 'https://script.google.com/macros/s/AKfycbzg4EmFZ_skAGZW5OYQPYXGYiDuKqXv1MUegfnwv-0_1S3C0a_aVaVrPY0ixsB0wrLDMg/exec';
+  const URL_GUARDADO = 'https://script.google.com/macros/s/AKfycbxWmYYOS-YhxOSccATicOVlQytuoCdl5km3DbH69nYVtcgzttZEC8E4qC9UfCyj951MkQ/exec';
 
   /* Grados que el alumno puede elegir al guardar */
   const GRADOS = ['2ºA', '2ºB'];
