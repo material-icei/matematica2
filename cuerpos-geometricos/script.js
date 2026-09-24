@@ -40,7 +40,8 @@
       color: '#3ba7e0',
       rueda: false,
       medidas: [3, 1.5, 1.5],
-      texto: 'Tiene caras planas con forma de rectángulo. No rueda.',
+      texto: 'Todas sus caras son planas y tienen forma de rectángulo. No rueda.',
+      detalleCaras: '6 caras planas con forma de rectángulo',
       caras: 6, vertices: 8, aristas: 12,
       ejemplos: 'edificio, aula, armario, escritorio, ladrillo'
     },
@@ -50,6 +51,7 @@
       rueda: false,
       medidas: [2, 2, 2],
       texto: 'Es un cuerpo con caras planas. Todas sus caras son cuadrados iguales. No rueda.',
+      detalleCaras: '6 caras planas con forma de cuadrado',
       caras: 6, vertices: 8, aristas: 12,
       ejemplos: 'caja, dado, depósito'
     },
@@ -58,8 +60,9 @@
       color: '#2fa866',
       rueda: true,
       medidas: [2, 2, 2],
-      texto: 'Tiene dos caras planas redondas y una parte curva. Si lo acostás, rueda.',
-      caras: 2, vertices: 0, aristas: 2,
+      texto: 'Tiene 2 caras planas con forma de círculo y 1 cara curva. Si lo acostás, rueda.',
+      detalleCaras: '2 caras planas y 1 cara curva',
+      caras: 3, vertices: 0, aristas: 2,
       ejemplos: 'columna, tacho de basura, tubo'
     },
     esfera: {
@@ -67,8 +70,9 @@
       color: '#ffc83d',
       rueda: true,
       medidas: [2, 2, 2],
-      texto: 'Es toda curva, como una pelota. No tiene caras planas ni puntas. Rueda para todos lados.',
-      caras: 0, vertices: 0, aristas: 0,
+      texto: 'Tiene 1 sola cara, que es curva, como una pelota. No tiene aristas ni vértices. Rueda para todos lados.',
+      detalleCaras: '1 cara curva',
+      caras: 1, vertices: 0, aristas: 0,
       ejemplos: 'pelota, globo terráqueo, luminaria'
     },
     cono: {
@@ -76,8 +80,9 @@
       color: '#f28c28',
       rueda: true,
       medidas: [2, 2, 2],
-      texto: 'Tiene una cara plana redonda, una parte curva y una punta. Rueda dando vueltas en círculo.',
-      caras: 1, vertices: 1, aristas: 1,
+      texto: 'Tiene 1 cara plana con forma de círculo, 1 cara curva y 1 vértice: la punta. Rueda dando vueltas en círculo.',
+      detalleCaras: '1 cara plana y 1 cara curva',
+      caras: 2, vertices: 1, aristas: 1,
       ejemplos: 'cono de tránsito, gorrito de cumpleaños, embudo'
     },
     piramide: {
@@ -87,6 +92,7 @@
       rueda: false,
       medidas: [2, 2, 2],
       texto: 'Tiene una base cuadrada y caras con forma de triángulo que se juntan en una punta. No rueda.',
+      detalleCaras: '1 cara cuadrada y 4 caras con forma de triángulo',
       caras: 5, vertices: 5, aristas: 8,
       ejemplos: 'techo, torre, adorno'
     }
@@ -243,6 +249,44 @@
     ]
   };
 
+  /* Espacio libre donde se construyen los desafíos */
+  const ESPACIO_LIBRE = {
+    id: 'propio', nombre: 'Espacio libre', emoji: '🏆', piso: '#e8eef5',
+    ideas: LUGAR_PROPIO.ideas
+  };
+
+  /* Objetos de la actividad "Asociar" (emojis).
+     art: artículo para armar frases ("la pelota", "el dado"). */
+  const OBJETOS_ASOCIAR = [
+    { emoji: '⚽', nombre: 'pelota', art: 'la', cuerpo: 'esfera' },
+    { emoji: '🍊', nombre: 'naranja', art: 'la', cuerpo: 'esfera' },
+    { emoji: '🎈', nombre: 'globo', art: 'el', cuerpo: 'esfera' },
+    { emoji: '🎁', nombre: 'regalo', art: 'el', cuerpo: 'cubo' },
+    { emoji: '🎲', nombre: 'dado', art: 'el', cuerpo: 'cubo' },
+    { emoji: '🧊', nombre: 'cubito de hielo', art: 'el', cuerpo: 'cubo' },
+    { emoji: '🧳', nombre: 'valija', art: 'la', cuerpo: 'prisma' },
+    { emoji: '📕', nombre: 'libro', art: 'el', cuerpo: 'prisma' },
+    { emoji: '🧱', nombre: 'ladrillo', art: 'el', cuerpo: 'prisma' },
+    { emoji: '🥫', nombre: 'lata', art: 'la', cuerpo: 'cilindro' },
+    { emoji: '🛢️', nombre: 'tambor', art: 'el', cuerpo: 'cilindro' },
+    { emoji: '🧻', nombre: 'rollo de papel', art: 'el', cuerpo: 'cilindro' },
+    { emoji: '🍦', nombre: 'cucurucho', art: 'el', cuerpo: 'cono' },
+    { emoji: '🥕', nombre: 'zanahoria', art: 'la', cuerpo: 'cono' },
+    { emoji: '🎉', nombre: 'cono de cotillón', art: 'el', cuerpo: 'cono' },
+    { emoji: '⛺', nombre: 'carpa', art: 'la', cuerpo: 'piramide' }
+  ];
+
+  /* Actividad "Escribir el nombre": respuestas aceptadas
+     (se aceptan mayúsculas, minúsculas y palabras sin tilde) */
+  const NOMBRES_ACEPTADOS = {
+    prisma: ['prisma rectangular', 'prisma'],
+    cubo: ['cubo'],
+    cilindro: ['cilindro'],
+    esfera: ['esfera'],
+    cono: ['cono'],
+    piramide: ['piramide', 'piramide de base cuadrada']
+  };
+
   /* Desafíos geométricos.
      - cumple(datos): devuelve true cuando el desafío está logrado.
        datos.cuenta tiene cuántos cuerpos hay de cada tipo,
@@ -309,7 +353,7 @@
      URL_GUARDADO: dirección de la "aplicación web" de Google Apps Script
      que guarda las imágenes en la carpeta de Drive (ver README.md).
      La carpeta de destino se define dentro de ese script, no acá. */
-  const URL_GUARDADO = 'https://script.google.com/macros/s/AKfycbzg4EmFZ_skAGZW5OYQPYXGYiDuKqXv1MUegfnwv-0_1S3C0a_aVaVrPY0ixsB0wrLDMg/exec';
+  const URL_GUARDADO = '1PH3W3gi6wzxV2LMIW6K7bp9XWxZK9jqj';
 
   /* Grados que el alumno puede elegir al guardar */
   const GRADOS = ['2ºA', '2ºB'];
@@ -725,6 +769,8 @@
   /* Bucle de dibujo: suaviza la cámara y hace "latir" lo elegido */
   function animar(tiempo) {
     requestAnimationFrame(animar);
+    dibujarVisor();
+    if (!$('#pantalla-construir').classList.contains('activa')) return;
     moverCamaraSuave();
     const brillo = 0.2 + Math.sin(tiempo / 180) * 0.12;
     estado.objetos.forEach((m) => {
@@ -1299,18 +1345,10 @@
     </div>`;
   }
 
-  function htmlFicha(mesh) {
-    const tipo = mesh.userData.tipo;
+  /* Ficha de un cuerpo (actividad Conceptos) */
+  function htmlFicha(tipo) {
     const c = CUERPOS[tipo];
-    const numeros = c.caras + c.vertices + c.aristas > 0
-      ? `<div class="ficha-numeros">
-          <div class="ficha-numero"><strong>${c.caras}</strong>${tipo === 'cubo' || tipo === 'prisma' || tipo === 'piramide' ? 'caras' : 'caras planas'}</div>
-          <div class="ficha-numero"><strong>${c.vertices}</strong>vértices (puntas)</div>
-          <div class="ficha-numero"><strong>${c.aristas}</strong>aristas (bordes)</div>
-        </div>`
-      : '';
-    return `<div class="seccion-panel ficha">
-      <div class="ficha-cabecera">
+    return `<div class="ficha-cabecera">
         ${iconoCuerpo(tipo)}
         <div>
           <h3 class="ficha-nombre">${c.nombreLargo || c.nombre}</h3>
@@ -1320,9 +1358,20 @@
         </div>
       </div>
       <p class="ficha-texto">${c.texto}</p>
-      ${numeros}
-      <p class="ficha-ejemplos"><strong>En la escuela:</strong> ${c.ejemplos}.</p>
-    </div>`;
+      <div class="ficha-numeros">
+        <div class="ficha-numero"><strong>${c.caras}</strong>${c.caras === 1 ? 'cara' : 'caras'}</div>
+        <div class="ficha-numero"><strong>${c.aristas}</strong>${c.aristas === 1 ? 'arista' : 'aristas'}</div>
+        <div class="ficha-numero"><strong>${c.vertices}</strong>${c.vertices === 1 ? 'vértice' : 'vértices'}</div>
+      </div>
+      <p class="ficha-detalle"><strong>Sus caras:</strong> ${c.detalleCaras}.</p>
+      <p class="ficha-ejemplos"><strong>En la escuela:</strong> ${c.ejemplos}.</p>`;
+  }
+
+  /* Título chico del cuerpo elegido en el panel derecho */
+  function htmlTituloCuerpo(mesh) {
+    const tipo = mesh.userData.tipo;
+    return `<div class="seccion-panel titulo-cuerpo">${iconoCuerpo(tipo, mesh.userData.color)}
+      <strong>${CUERPOS[tipo].nombreLargo || CUERPOS[tipo].nombre}</strong></div>`;
   }
 
   function htmlMover() {
@@ -1427,7 +1476,7 @@
       html += htmlIdeas();
     } else if (elegidos.length === 1) {
       const m = elegidos[0];
-      html += htmlFicha(m) + htmlNombre(m) + htmlMover() + htmlTamanio(true) + htmlGirar() +
+      html += htmlTituloCuerpo(m) + htmlNombre(m) + htmlMover() + htmlTamanio(true) + htmlGirar() +
         htmlColores(m.userData.color) + htmlTexturas(m.userData.textura) + htmlCopiarBorrar();
     } else {
       html += `<p class="panel-consejo"><span aria-hidden="true">✋</span> Elegiste ${elegidos.length} cuerpos. Arrastralos para moverlos juntos.</p>` +
@@ -1481,6 +1530,21 @@
      ========================================================= */
   function mostrarPantalla(id) {
     $$('.pantalla').forEach((p) => p.classList.toggle('activa', p.id === id));
+    window.scrollTo(0, 0);
+    // El visor 3D de las actividades se muda a la pantalla que lo necesita
+    if (document.querySelector(`#${id} [data-visor]`)) montarVisor(id);
+  }
+
+  /* Abre una de las 6 actividades de repaso */
+  function abrirActividad(nombre) {
+    switch (nombre) {
+      case 'conceptos': mostrarPantalla('pantalla-conceptos'); elegirConcepto(ORDEN_CUERPOS[0]); break;
+      case 'elementos': mostrarPantalla('pantalla-elementos'); iniciarElementos(); break;
+      case 'clasificar': prepararClasificacion(); mostrarPantalla('pantalla-clasificar'); break;
+      case 'asociar': mostrarPantalla('pantalla-asociar'); iniciarAsociar(); break;
+      case 'escribir': mostrarPantalla('pantalla-escribir'); iniciarEscribir(); break;
+      case 'desafios': dibujarDesafios(); mostrarPantalla('pantalla-desafios'); break;
+    }
   }
 
   function dibujarLugares() {
@@ -1546,8 +1610,8 @@
     document.body.classList.toggle('modo-explorar', modo === 'explorar');
     $('#ayuda-explorar').classList.toggle('oculto', modo !== 'explorar');
     $('#btn-modo').innerHTML = modo === 'explorar'
-      ? '<span aria-hidden="true">🛠️</span> Construir'
-      : '<span aria-hidden="true">🔭</span> Explorar';
+      ? '<span aria-hidden="true">🛠️</span> Seguir construyendo'
+      : '<span aria-hidden="true">🔭</span> Mostrar maqueta';
     if (modo === 'explorar') {
       estado.seleccion = [];
       dibujarPanelDerecho();
@@ -1581,11 +1645,10 @@
   }
 
   function activarDesafio(id) {
+    empezarLugar(ESPACIO_LIBRE);
     estado.desafioActivo = DESAFIOS.find((d) => d.id === id);
     $('#cartel-desafio-texto').textContent = estado.desafioActivo.texto;
     $('#cartel-desafio').classList.remove('oculto');
-    cerrarVentana('ventana-desafios');
-    if (estado.modo !== 'construir') cambiarModo('construir');
     avisar('¡A construir!');
   }
 
@@ -1654,7 +1717,7 @@
 
   /* Arrastrar fichas con mouse o dedo; también se puede tocar ficha y luego grupo */
   function conectarClasificacion() {
-    const ventana = $('#ventana-clasificar');
+    const ventana = $('#pantalla-clasificar');
     let arrastre = null;
 
     ventana.addEventListener('pointerdown', (e) => {
@@ -1721,6 +1784,507 @@
       }
     });
     $('#btn-clasificar-otra').addEventListener('click', prepararClasificacion);
+  }
+
+  /* =========================================================
+     14 b. VISOR 3D DE LAS ACTIVIDADES
+     Un solo cuerpo en una escena chica, que se puede girar.
+     Lo usan Conceptos, Elementos y Escribir el nombre.
+     ========================================================= */
+  const visor = {
+    renderer: null, escena: null, camara: null, mesh: null, marcas: null,
+    contenedor: null, observador: null,
+    autoGiro: true, theta: 0.7, phi: 1.05, radio: 7,
+    arrastre: null, alTocar: null
+  };
+
+  /* Mezcla una lista (orden al azar) */
+  function mezclar(lista) {
+    const copia = lista.slice();
+    for (let i = copia.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copia[i], copia[j]] = [copia[j], copia[i]];
+    }
+    return copia;
+  }
+
+  const articuloDe = (tipo) => (['esfera', 'piramide'].includes(tipo) ? 'la' : 'el');
+  const delCuerpo = (tipo) => `${articuloDe(tipo) === 'la' ? 'de la' : 'del'} ${CUERPOS[tipo].nombre.toLowerCase()}`;
+
+  function puntosDeProgreso(selector, total, actual) {
+    $(selector).innerHTML = Array.from({ length: total }, (_, i) =>
+      `<span class="punto-progreso ${i < actual ? 'hecho' : ''} ${i === actual ? 'actual' : ''}"></span>`).join('');
+    $(selector).setAttribute('aria-label', `Vas por el ${Math.min(actual + 1, total)} de ${total}`);
+  }
+
+  function iniciarVisorActividades() {
+    visor.renderer = new THREE.WebGLRenderer({ antialias: true });
+    visor.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    visor.escena = new THREE.Scene();
+    visor.escena.background = new THREE.Color('#dff1fb');
+    visor.camara = new THREE.PerspectiveCamera(40, 1, 0.1, 100);
+    visor.escena.add(new THREE.HemisphereLight(0xffffff, 0xa9bcd6, 0.7));
+    const luz = new THREE.DirectionalLight(0xffffff, 0.55);
+    luz.position.set(4, 8, 6);
+    visor.escena.add(luz);
+    visor.marcas = new THREE.Group();
+    visor.escena.add(visor.marcas);
+    visor.observador = new ResizeObserver(ajustarVisor);
+    conectarPunteroVisor();
+  }
+
+  /* Pone el visor dentro de la pantalla indicada */
+  function montarVisor(pantallaId) {
+    const contenedor = document.querySelector(`#${pantallaId} [data-visor]`);
+    if (visor.contenedor !== contenedor) {
+      if (visor.contenedor) visor.observador.unobserve(visor.contenedor);
+      contenedor.appendChild(visor.renderer.domElement);
+      visor.contenedor = contenedor;
+      visor.observador.observe(contenedor);
+    }
+    ajustarVisor();
+  }
+
+  function ajustarVisor() {
+    const c = visor.contenedor;
+    if (!c) return;
+    const ancho = Math.max(1, c.clientWidth), alto = Math.max(1, c.clientHeight);
+    visor.renderer.setSize(ancho, alto, false);
+    visor.camara.aspect = ancho / alto;
+    visor.camara.updateProjectionMatrix();
+  }
+
+  /* Se llama en cada cuadro: dibuja el visor solo si se está viendo */
+  function dibujarVisor() {
+    if (!visor.contenedor || !visor.mesh || !visor.contenedor.closest('.pantalla.activa')) return;
+    if (visor.autoGiro && !visor.arrastre) visor.theta += 0.006;
+    const sp = Math.sin(visor.phi);
+    visor.camara.position.set(visor.radio * sp * Math.sin(visor.theta), visor.radio * Math.cos(visor.phi), visor.radio * sp * Math.cos(visor.theta));
+    visor.camara.lookAt(0, 0, 0);
+    visor.renderer.render(visor.escena, visor.camara);
+  }
+
+  /* colorFijo: en "Elementos" todos los cuerpos son celestes, para que se vea bien la marca roja */
+  function mostrarCuerpoEnVisor(tipo, autoGiro, colorFijo) {
+    if (visor.mesh) {
+      visor.escena.remove(visor.mesh);
+      visor.mesh.material.dispose();
+    }
+    limpiarMarcas();
+    const material = new THREE.MeshStandardMaterial({
+      color: colorFijo || sombrear(CUERPOS[tipo].color, 0.15),
+      roughness: 0.6,
+      flatShading: ['cubo', 'prisma', 'piramide'].includes(tipo),
+      polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1
+    });
+    visor.mesh = new THREE.Mesh(geometrias[tipo], material);
+    visor.mesh.userData.tipo = tipo;
+    if (geometriasBordes[tipo]) visor.mesh.add(new THREE.LineSegments(geometriasBordes[tipo], materialBordes));
+    visor.escena.add(visor.mesh);
+    visor.autoGiro = autoGiro;
+    visor.theta = 0.7;
+    visor.phi = 1.05;
+    visor.radio = tipo === 'prisma' ? 8.5 : 7;
+  }
+
+  /* Arrastrar gira el cuerpo; un toque sin arrastrar se usa en "Elementos" */
+  function conectarPunteroVisor() {
+    const lienzo = visor.renderer.domElement;
+    lienzo.addEventListener('pointerdown', (e) => {
+      lienzo.setPointerCapture(e.pointerId);
+      visor.arrastre = { x: e.clientX, y: e.clientY, ultX: e.clientX, ultY: e.clientY, movido: false };
+    });
+    lienzo.addEventListener('pointermove', (e) => {
+      const a = visor.arrastre;
+      if (!a) return;
+      if (Math.hypot(e.clientX - a.x, e.clientY - a.y) > 6) a.movido = true;
+      if (a.movido) {
+        visor.theta -= (e.clientX - a.ultX) * 0.01;
+        visor.phi = limitar(visor.phi - (e.clientY - a.ultY) * 0.01, 0.15, 2.95);
+      }
+      a.ultX = e.clientX;
+      a.ultY = e.clientY;
+    });
+    const soltar = (e) => {
+      const a = visor.arrastre;
+      visor.arrastre = null;
+      if (a && !a.movido && visor.alTocar && e.type === 'pointerup') visor.alTocar(e);
+    };
+    lienzo.addEventListener('pointerup', soltar);
+    lienzo.addEventListener('pointercancel', soltar);
+  }
+
+  /* ---------- Marcas de color sobre el cuerpo (cara, arista o vértice) ---------- */
+  function limpiarMarcas() {
+    visor.marcas.children.slice().forEach((m) => {
+      visor.marcas.remove(m);
+      m.geometry.dispose();
+      m.material.dispose();
+    });
+  }
+
+  const materialMarca = (color) => new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide });
+
+  /* Cada cara se reconoce por la dirección hacia la que "mira" */
+  function claveDeCara(tipo, normal) {
+    if (tipo === 'esfera') return 'curva';
+    if (tipo === 'cilindro') return normal.y > 0.9 ? 'arriba' : normal.y < -0.9 ? 'abajo' : 'curva';
+    if (tipo === 'cono') return normal.y < -0.9 ? 'base' : 'curva';
+    return [normal.x, normal.y, normal.z].map((v) => Math.round(v * 10)).join(',');
+  }
+
+  function marcarCara(tipo, clave, color) {
+    const geo = geometrias[tipo].toNonIndexed();
+    const pos = geo.attributes.position;
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), n = new THREE.Vector3();
+    const puntos = [];
+    for (let i = 0; i < pos.count; i += 3) {
+      a.fromBufferAttribute(pos, i);
+      b.fromBufferAttribute(pos, i + 1);
+      c.fromBufferAttribute(pos, i + 2);
+      THREE.Triangle.getNormal(a, b, c, n);
+      if (n.lengthSq() < 0.5 || claveDeCara(tipo, n) !== clave) continue;
+      [a, b, c].forEach((v) => puntos.push(v.x + n.x * 0.012, v.y + n.y * 0.012, v.z + n.z * 0.012));
+    }
+    geo.dispose();
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(puntos, 3));
+    visor.marcas.add(new THREE.Mesh(g, materialMarca(color)));
+  }
+
+  function marcarArista(arista, color) {
+    let mesh;
+    if (arista.tipo === 'circulo') {
+      mesh = new THREE.Mesh(new THREE.TorusGeometry(arista.r, 0.07, 8, 64), materialMarca(color));
+      mesh.rotation.x = Math.PI / 2;
+      mesh.position.y = arista.y;
+    } else {
+      const direccion = arista.b.clone().sub(arista.a);
+      mesh = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, direccion.length(), 8), materialMarca(color));
+      mesh.position.copy(arista.a).addScaledVector(direccion, 0.5);
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direccion.normalize());
+    }
+    visor.marcas.add(mesh);
+  }
+
+  function marcarVertice(punto, color) {
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.13, 16, 12), materialMarca(color));
+    mesh.position.copy(punto);
+    visor.marcas.add(mesh);
+  }
+
+  /* Vértices y aristas de cada cuerpo, con las medidas de las geometrías */
+  function elementosDe(tipo) {
+    const caja = (x, y, z) => {
+      const vertices = [];
+      [-1, 1].forEach((a) => [-1, 1].forEach((b) => [-1, 1].forEach((c) => vertices.push(new THREE.Vector3(a * x, b * y, c * z)))));
+      const aristas = [];
+      for (let i = 0; i < 8; i++) {
+        for (let j = i + 1; j < 8; j++) {
+          const d = vertices[i].clone().sub(vertices[j]);
+          const cambian = ['x', 'y', 'z'].filter((k) => Math.abs(d[k]) > 1e-6).length;
+          if (cambian === 1) aristas.push({ tipo: 'recta', a: vertices[i], b: vertices[j] });
+        }
+      }
+      return { vertices, aristas };
+    };
+    switch (tipo) {
+      case 'cubo': return caja(1, 1, 1);
+      case 'prisma': return caja(1.5, 0.75, 0.75);
+      case 'piramide': {
+        const punta = new THREE.Vector3(0, 1, 0);
+        const base = [[1, 1], [1, -1], [-1, -1], [-1, 1]].map(([x, z]) => new THREE.Vector3(x, -1, z));
+        const aristas = base.map((p, i) => ({ tipo: 'recta', a: p, b: base[(i + 1) % 4] }))
+          .concat(base.map((p) => ({ tipo: 'recta', a: punta, b: p })));
+        return { vertices: [punta].concat(base), aristas };
+      }
+      case 'cilindro':
+        return { vertices: [], aristas: [{ tipo: 'circulo', y: 1, r: 1 }, { tipo: 'circulo', y: -1, r: 1 }] };
+      case 'cono':
+        return { vertices: [new THREE.Vector3(0, 1, 0)], aristas: [{ tipo: 'circulo', y: -1, r: 1 }] };
+      default:
+        return { vertices: [], aristas: [] };
+    }
+  }
+
+  function distanciaAArista(p, arista) {
+    if (arista.tipo === 'circulo') return Math.hypot(Math.hypot(p.x, p.z) - arista.r, p.y - arista.y);
+    return new THREE.Line3(arista.a, arista.b).closestPointToPoint(p, true, new THREE.Vector3()).distanceTo(p);
+  }
+
+  /* ¿Qué elemento tocó el alumno? Primero busca vértices, después aristas y si no, es una cara */
+  function elementoTocado(e) {
+    const r = visor.renderer.domElement.getBoundingClientRect();
+    const punto = new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    raycaster.setFromCamera(punto, visor.camara);
+    const toque = raycaster.intersectObject(visor.mesh, false)[0];
+    const tipo = visor.mesh.userData.tipo;
+    if (!toque) {
+      // Tocó justo afuera: si fue muy cerca de una punta, cuenta como vértice
+      const cerca = elementosDe(tipo).vertices.find((v) => {
+        const p = v.clone().project(visor.camara);
+        const x = r.left + (p.x + 1) / 2 * r.width, y = r.top + (1 - p.y) / 2 * r.height;
+        return Math.hypot(x - e.clientX, y - e.clientY) < 24;
+      });
+      return cerca ? { elemento: 'vertice', vertice: cerca } : null;
+    }
+    const p = toque.point;
+    const escala = visor.radio / 7;   // más lejos = más margen para tocar
+    const { vertices, aristas } = elementosDe(tipo);
+
+    const vertice = vertices.find((v) => v.distanceTo(p) < 0.3 * escala);
+    if (vertice) return { elemento: 'vertice', vertice };
+    const arista = aristas.find((a) => distanciaAArista(p, a) < 0.15 * escala);
+    if (arista) return { elemento: 'arista', arista };
+    const clave = claveDeCara(tipo, toque.face.normal);
+    return { elemento: 'cara', clave, curva: clave === 'curva' };
+  }
+
+  function marcarElemento(tipo, t, color) {
+    if (t.elemento === 'vertice') marcarVertice(t.vertice, color);
+    else if (t.elemento === 'arista') marcarArista(t.arista, color);
+    else marcarCara(tipo, t.clave, color);
+  }
+
+  /* =========================================================
+     14 c. ACTIVIDAD: CONCEPTOS
+     ========================================================= */
+  function dibujarSelectorConceptos() {
+    $('#selector-conceptos').innerHTML = ORDEN_CUERPOS.map((tipo) => `
+      <button type="button" class="btn-cuerpo" data-concepto="${tipo}" aria-pressed="false">
+        ${iconoCuerpo(tipo)}<span>${CUERPOS[tipo].nombre}</span>
+      </button>`).join('');
+    $('#selector-conceptos').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-concepto]');
+      if (b) elegirConcepto(b.dataset.concepto);
+    });
+  }
+
+  function elegirConcepto(tipo) {
+    $$('[data-concepto]').forEach((b) => {
+      const activo = b.dataset.concepto === tipo;
+      b.classList.toggle('activo', activo);
+      b.setAttribute('aria-pressed', activo);
+    });
+    $('#ficha-concepto').innerHTML = htmlFicha(tipo);
+    visor.alTocar = null;
+    mostrarCuerpoEnVisor(tipo, true);
+  }
+
+  /* =========================================================
+     14 d. ACTIVIDAD: ELEMENTOS DE UN CUERPO
+     ========================================================= */
+  const ELEMENTOS = {
+    cara: { pedido: 'una CARA', nombre: 'una cara', ayuda: 'es una parte plana o curva del cuerpo' },
+    arista: { pedido: 'una ARISTA', nombre: 'una arista', ayuda: 'es una línea donde se juntan dos caras' },
+    vertice: { pedido: 'un VÉRTICE', nombre: 'un vértice', ayuda: 'es una punta' }
+  };
+  const COLOR_BIEN = '#e5483b';
+  const COLOR_OTRO = '#ffc83d';   // lo que tocó cuando no era lo pedido
+  const juegoElementos = { rondas: [], indice: 0, resuelta: false };
+
+  function iniciarElementos() {
+    juegoElementos.rondas = mezclar(ORDEN_CUERPOS).map((tipo) => {
+      const c = CUERPOS[tipo];
+      const opciones = ['cara'];
+      if (c.aristas) opciones.push('arista');
+      if (c.vertices) opciones.push('vertice');
+      return { tipo, pedido: opciones[Math.floor(Math.random() * opciones.length)] };
+    });
+    juegoElementos.indice = 0;
+    $('#btn-elementos-otra').classList.add('oculto');
+    mostrarRondaElementos();
+  }
+
+  function mostrarRondaElementos() {
+    const ronda = juegoElementos.rondas[juegoElementos.indice];
+    juegoElementos.resuelta = false;
+    puntosDeProgreso('#progreso-elementos', juegoElementos.rondas.length, juegoElementos.indice);
+    $('#consigna-elementos').innerHTML = `Tocá <strong>${ELEMENTOS[ronda.pedido].pedido}</strong> ${delCuerpo(ronda.tipo)}.`;
+    $('#mensaje-elementos').textContent = '';
+    $('#btn-elementos-siguiente').classList.add('oculto');
+    mostrarCuerpoEnVisor(ronda.tipo, false, '#7fb3e0');
+    visor.alTocar = tocarElemento;
+  }
+
+  function tocarElemento(e) {
+    if (juegoElementos.resuelta) return;
+    const ronda = juegoElementos.rondas[juegoElementos.indice];
+    const t = elementoTocado(e);
+    if (!t) return;
+    limpiarMarcas();
+    const tipoDeCara = t.elemento === 'cara' ? (t.curva ? ' curva' : ' plana') : '';
+
+    if (t.elemento === ronda.pedido) {
+      marcarElemento(ronda.tipo, t, COLOR_BIEN);
+      juegoElementos.resuelta = true;
+      const ultima = juegoElementos.indice === juegoElementos.rondas.length - 1;
+      $('#mensaje-elementos').textContent = `¡Muy bien! Marcaste ${ELEMENTOS[t.elemento].nombre}${tipoDeCara} ${delCuerpo(ronda.tipo)}.` +
+        (ultima ? ' ¡Terminaste! Encontraste los elementos de los 6 cuerpos.' : '');
+      $('#btn-elementos-siguiente').classList.toggle('oculto', ultima);
+      $('#btn-elementos-otra').classList.toggle('oculto', !ultima);
+      if (ultima) puntosDeProgreso('#progreso-elementos', juegoElementos.rondas.length, juegoElementos.rondas.length);
+    } else {
+      marcarElemento(ronda.tipo, t, COLOR_OTRO);
+      const pedido = ELEMENTOS[ronda.pedido];
+      $('#mensaje-elementos').textContent = `Eso es ${ELEMENTOS[t.elemento].nombre}${tipoDeCara}. Buscá ${pedido.nombre}: ${pedido.ayuda}.`;
+    }
+  }
+
+  /* =========================================================
+     14 e. ACTIVIDAD: ASOCIAR
+     ========================================================= */
+  const juegoAsociar = { rondas: [], indice: 0 };
+
+  function iniciarAsociar() {
+    // Solo se preguntan los cuerpos que tienen objetos en la lista
+    juegoAsociar.rondas = mezclar(ORDEN_CUERPOS.filter((t) => OBJETOS_ASOCIAR.some((o) => o.cuerpo === t)));
+    juegoAsociar.indice = 0;
+    $('#grilla-asociar').innerHTML = mezclar(OBJETOS_ASOCIAR).map((o) => `
+      <button type="button" class="objeto-asociar" data-objeto="${OBJETOS_ASOCIAR.indexOf(o)}">
+        <span class="objeto-emoji" aria-hidden="true">${o.emoji}</span>
+        <span class="objeto-nombre">${o.nombre}</span>
+      </button>`).join('');
+    $('#btn-asociar-otra').classList.add('oculto');
+    mostrarRondaAsociar();
+  }
+
+  function mostrarRondaAsociar() {
+    const tipo = juegoAsociar.rondas[juegoAsociar.indice];
+    puntosDeProgreso('#progreso-asociar', juegoAsociar.rondas.length, juegoAsociar.indice);
+    $('#consigna-asociar').innerHTML = `${iconoCuerpo(tipo)}<span>Tocá todos los objetos con forma de <strong>${CUERPOS[tipo].nombre.toUpperCase()}</strong>.</span>`;
+    $('#mensaje-asociar').textContent = '';
+    $('#btn-asociar-siguiente').classList.add('oculto');
+  }
+
+  function tocarObjeto(boton) {
+    const tipo = juegoAsociar.rondas[juegoAsociar.indice];
+    const objeto = OBJETOS_ASOCIAR[Number(boton.dataset.objeto)];
+    if (!tipo || boton.classList.contains('encontrado') || !$('#btn-asociar-siguiente').classList.contains('oculto')) return;
+
+    if (objeto.cuerpo === tipo) {
+      boton.classList.add('encontrado');
+      boton.setAttribute('aria-label', `${objeto.nombre}: ya lo encontraste`);
+      const faltan = OBJETOS_ASOCIAR.filter((o, i) => o.cuerpo === tipo &&
+        !$(`[data-objeto="${i}"]`).classList.contains('encontrado')).length;
+      if (faltan) {
+        $('#mensaje-asociar').textContent = `¡Sí! ${mayuscula(objeto.art)} ${objeto.nombre} tiene forma de ${CUERPOS[tipo].nombre.toLowerCase()}. ${faltan === 1 ? 'Falta 1.' : `Faltan ${faltan}.`}`;
+        return;
+      }
+      const ultima = juegoAsociar.indice === juegoAsociar.rondas.length - 1;
+      $('#mensaje-asociar').textContent = ultima
+        ? '¡Muy bien! Encontraste la forma de todos los objetos.'
+        : `¡Muy bien! Encontraste todos los objetos con forma de ${CUERPOS[tipo].nombre.toLowerCase()}.`;
+      $('#btn-asociar-siguiente').classList.toggle('oculto', ultima);
+      $('#btn-asociar-otra').classList.toggle('oculto', !ultima);
+      if (ultima) puntosDeProgreso('#progreso-asociar', juegoAsociar.rondas.length, juegoAsociar.rondas.length);
+    } else {
+      boton.classList.remove('rebote');
+      void boton.offsetWidth; // reinicia la animación
+      boton.classList.add('rebote');
+      $('#mensaje-asociar').textContent = `Mmm… ¿${objeto.art} ${objeto.nombre} tiene forma de ${CUERPOS[tipo].nombre.toLowerCase()}? Mirá bien y probá con otro.`;
+    }
+  }
+
+  const mayuscula = (texto) => texto.charAt(0).toUpperCase() + texto.slice(1);
+
+  /* =========================================================
+     14 f. ACTIVIDAD: ESCRIBIR EL NOMBRE
+     ========================================================= */
+  const juegoEscribir = { rondas: [], indice: 0, pistas: 0, resuelta: false };
+
+  const normalizar = (texto) => texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ').trim();
+
+  function iniciarEscribir() {
+    juegoEscribir.rondas = mezclar(ORDEN_CUERPOS);
+    juegoEscribir.indice = 0;
+    $('#btn-escribir-otra').classList.add('oculto');
+    mostrarRondaEscribir();
+  }
+
+  function mostrarRondaEscribir() {
+    const tipo = juegoEscribir.rondas[juegoEscribir.indice];
+    juegoEscribir.pistas = 0;
+    juegoEscribir.resuelta = false;
+    puntosDeProgreso('#progreso-escribir', juegoEscribir.rondas.length, juegoEscribir.indice);
+    mostrarCuerpoEnVisor(tipo, true);
+    visor.alTocar = null;
+    $('#input-escribir').value = '';
+    $('#input-escribir').disabled = false;
+    $('#mensaje-escribir').textContent = '';
+    $('#btn-escribir-siguiente').classList.add('oculto');
+    $('#btn-escribir-comprobar').disabled = false;
+    $('#btn-escribir-pista').disabled = false;
+    dibujarLetras();
+    $('#input-escribir').focus();
+  }
+
+  /* Muestra rayitas por cada letra; las pistas van mostrando letras */
+  function dibujarLetras(completa) {
+    const palabra = CUERPOS[juegoEscribir.rondas[juegoEscribir.indice]].nombre.toUpperCase();
+    let letrasVistas = 0;
+    $('#letras-escribir').innerHTML = [...palabra].map((letra) => {
+      if (letra === ' ') return '<span class="espacio"></span>';
+      letrasVistas++;
+      const ver = completa || letrasVistas <= juegoEscribir.pistas;
+      return `<span class="letra ${ver ? 'vista' : ''}">${ver ? letra : ''}</span>`;
+    }).join('');
+  }
+
+  function comprobarEscritura() {
+    if (juegoEscribir.resuelta) return;
+    const tipo = juegoEscribir.rondas[juegoEscribir.indice];
+    const escrito = normalizar($('#input-escribir').value);
+    if (!escrito) {
+      $('#mensaje-escribir').textContent = '✏️ Escribí el nombre del cuerpo.';
+      return;
+    }
+    if (NOMBRES_ACEPTADOS[tipo].includes(escrito)) {
+      juegoEscribir.resuelta = true;
+      dibujarLetras(true);
+      $('#input-escribir').disabled = true;
+      $('#btn-escribir-comprobar').disabled = true;
+      $('#btn-escribir-pista').disabled = true;
+      const ultima = juegoEscribir.indice === juegoEscribir.rondas.length - 1;
+      $('#mensaje-escribir').textContent = `¡Muy bien! Es ${articuloDe(tipo) === 'la' ? 'una' : 'un'} ${CUERPOS[tipo].nombre.toLowerCase()}.` +
+        (ultima ? ' ¡Escribiste los nombres de los 6 cuerpos!' : '');
+      $('#btn-escribir-siguiente').classList.toggle('oculto', ultima);
+      $('#btn-escribir-otra').classList.toggle('oculto', !ultima);
+      if (ultima) puntosDeProgreso('#progreso-escribir', juegoEscribir.rondas.length, juegoEscribir.rondas.length);
+    } else {
+      const casi = NOMBRES_ACEPTADOS[tipo].some((n) => n.startsWith(escrito) || escrito.startsWith(n.slice(0, 3)));
+      $('#mensaje-escribir').textContent = casi
+        ? '¡Casi! Revisá cómo se escribe. Si querés, tocá 💡 Pista.'
+        : 'Mmm… mirá bien el cuerpo y probá otra vez. Tocá 💡 Pista si necesitás ayuda.';
+    }
+  }
+
+  function darPista() {
+    const palabra = CUERPOS[juegoEscribir.rondas[juegoEscribir.indice]].nombre.replace(/ /g, '');
+    if (juegoEscribir.pistas < palabra.length - 1) juegoEscribir.pistas++;
+    dibujarLetras();
+    $('#input-escribir').focus();
+  }
+
+  function conectarActividades() {
+    dibujarSelectorConceptos();
+
+    $('#btn-elementos-siguiente').addEventListener('click', () => { juegoElementos.indice++; mostrarRondaElementos(); });
+    $('#btn-elementos-otra').addEventListener('click', iniciarElementos);
+
+    $('#grilla-asociar').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-objeto]');
+      if (b) tocarObjeto(b);
+    });
+    $('#btn-asociar-siguiente').addEventListener('click', () => { juegoAsociar.indice++; mostrarRondaAsociar(); });
+    $('#btn-asociar-otra').addEventListener('click', iniciarAsociar);
+
+    $('#btn-escribir-comprobar').addEventListener('click', comprobarEscritura);
+    $('#input-escribir').addEventListener('keydown', (e) => { if (e.key === 'Enter') comprobarEscritura(); });
+    $('#btn-escribir-pista').addEventListener('click', darPista);
+    $('#btn-escribir-siguiente').addEventListener('click', () => { juegoEscribir.indice++; mostrarRondaEscribir(); });
+    $('#btn-escribir-otra').addEventListener('click', iniciarEscribir);
   }
 
   /* =========================================================
@@ -2186,12 +2750,37 @@
     });
   }
 
+  /* Borra la maqueta y vuelve al menú de 3 tarjetas */
+  function volverAlMenu() {
+    estado.objetos.slice().forEach(quitarMesh);
+    estado.seleccion = [];
+    estado.desafioActivo = null;
+    pilaDeshacer.length = 0;
+    pilaRehacer.length = 0;
+    $('#cartel-desafio').classList.add('oculto');
+    cambiarModo('construir');
+    mostrarPantalla('pantalla-menu');
+  }
+
   function conectarBotones() {
-    $('#btn-comenzar').addEventListener('click', () => mostrarPantalla('pantalla-lugares'));
+    $('#btn-comenzar').addEventListener('click', () => mostrarPantalla('pantalla-menu'));
+
+    // Botones "Volver" y tarjetas del menú que llevan a otra pantalla
+    $$('[data-ir]').forEach((b) => b.addEventListener('click', () => {
+      if (b.dataset.ir === 'pantalla-lugares') {
+        $('#form-propio').classList.add('oculto');
+        $('#input-propio').value = '';
+      }
+      mostrarPantalla(b.dataset.ir);
+    }));
+    $$('[data-actividad]').forEach((b) => b.addEventListener('click', () => abrirActividad(b.dataset.actividad)));
+    $('#btn-mas-desafios').addEventListener('click', () => {
+      cerrarVentana('ventana-felicitacion');
+      abrirActividad('desafios');
+    });
 
     // Ver maquetas guardadas
     $('#btn-ver-maquetas').addEventListener('click', abrirGaleria);
-    $('#btn-galeria-volver').addEventListener('click', () => mostrarPantalla('pantalla-bienvenida'));
     $('#btn-volver-galeria').addEventListener('click', cerrarVisor);
     $('#filtro-grado').addEventListener('click', (e) => {
       const b = e.target.closest('[data-filtro-grado]');
@@ -2218,18 +2807,18 @@
     $('#btn-modo').addEventListener('click', () => {
       const nuevo = estado.modo === 'construir' ? 'explorar' : 'construir';
       cambiarModo(nuevo);
-      avisar(nuevo === 'explorar' ? '🔭 Modo explorar' : '🛠️ Modo construir');
+      avisar(nuevo === 'explorar' ? '🔭 Mirá tu maqueta' : '🛠️ ¡A seguir construyendo!');
     });
-    $('#btn-nuevo').addEventListener('click', () => abrirVentana('ventana-confirmar'));
+    $('#btn-nuevo').addEventListener('click', () => {
+      if (estado.objetos.length) abrirVentana('ventana-confirmar');
+      else volverAlMenu();
+    });
     $('#btn-confirmar-no').addEventListener('click', () => cerrarVentana('ventana-confirmar'));
     $('#btn-confirmar-si').addEventListener('click', () => {
       cerrarVentana('ventana-confirmar');
-      $('#form-propio').classList.add('oculto');
-      $('#input-propio').value = '';
-      mostrarPantalla('pantalla-lugares');
+      volverAlMenu();
     });
 
-    $('#btn-desafios').addEventListener('click', () => { dibujarDesafios(); abrirVentana('ventana-desafios'); });
     $('#lista-desafios').addEventListener('click', (e) => {
       const t = e.target.closest('[data-desafio]');
       if (t) activarDesafio(t.dataset.desafio);
@@ -2238,8 +2827,6 @@
       estado.desafioActivo = null;
       $('#cartel-desafio').classList.add('oculto');
     });
-
-    $('#btn-clasificar').addEventListener('click', () => { prepararClasificacion(); abrirVentana('ventana-clasificar'); });
 
     $('#btn-mostrar').addEventListener('click', mostrarMiMaqueta);
     $('#maqueta-miniaturas').addEventListener('click', (e) => {
@@ -2291,6 +2878,8 @@
     dibujarLugares();
     dibujarPanelCuerpos();
     iniciarEscena3D();
+    iniciarVisorActividades();
+    conectarActividades();
     conectarBotonesCamara();
     conectarPanelDerecho();
     conectarClasificacion();
