@@ -34,18 +34,55 @@ Hacé doble clic en `index.html` para abrirla en Google Chrome. Funciona tambié
 
 ## Recorrido de la app
 
-1. **Bienvenida:** "¡Construyamos nuestra escuela!", con el botón ▶ Comenzar y el botón 👀 Ver maquetas (ver más abajo).
-2. **Elegir el lugar:** Aula, Patio, Biblioteca, Dirección, Secretaría, Baños, Hall, Entrada, Gimnasio, Comedor o *Mi propio espacio*, al que el alumno le pone nombre.
-3. **Construcción:**
+```
+Bienvenida ─▶ ¿Qué querés hacer?
+                ├─ 📚 Actividades de repaso ─▶ 6 actividades
+                ├─ 🧱 Construir ─▶ ¿Qué lugar querés construir? ─▶ Construcción
+                └─ 👀 Ver maquetas ─▶ Galería ─▶ Maqueta en 3D
+```
+
+1. **Bienvenida:** "¡Construyamos nuestra escuela! Actividades sobre los cuerpos geométricos", con un solo botón: ▶ Comenzar.
+2. **¿Qué querés hacer?:** tres tarjetas grandes: Actividades de repaso, Construir y Ver maquetas.
+
+### Actividades de repaso (grilla de 3 × 2)
+
+| Actividad | Qué hace el alumno |
+|---|---|
+| 📖 **Conceptos** | Elige un cuerpo y lo ve girar en 3D (puede girarlo con el dedo). Ve su ficha: cantidad de caras, aristas y vértices, cómo son sus caras, si rueda o no y en qué objetos de la escuela aparece. |
+| 📍 **Elementos de un cuerpo** | La app muestra los 6 cuerpos en orden aleatorio y pide "Tocá una CARA / ARISTA / VÉRTICE del…". El alumno puede girar el cuerpo. Si acierta, el elemento se pinta de rojo. Si toca otro elemento, se pinta de amarillo y la app le explica qué tocó y qué tiene que buscar. A la derecha quedan las definiciones con marcas de color. |
+| ⚽ **¿Rueda o no rueda?** | Arrastra cada cuerpo al grupo correcto (o lo toca y después toca el grupo). |
+| 🔗 **Asociar** | La app pide un cuerpo ("Tocá todos los objetos con forma de CILINDRO") y el alumno toca los objetos de la grilla. Los que encuentra se ponen tenues con un ✓. Si toca uno que no corresponde, la tarjeta hace un pequeño rebote con una pregunta para pensar. Son 6 rondas. |
+| ✏️ **Escribir el nombre** | Un cuerpo gira en 3D y el alumno escribe su nombre. Se aceptan mayúsculas, minúsculas y palabras sin tilde. Las rayitas muestran cuántas letras tiene, y el botón 💡 Pista va mostrando letras. |
+| 🏆 **Desafíos** | Elige una consigna y la app lo lleva **directo a un espacio libre** para construirla. Al cumplirla aparece la felicitación, con dos opciones: seguir construyendo o elegir más desafíos. |
+
+Todas las actividades tienen puntitos de avance, mensajes positivos y el botón "Jugar otra vez" al terminar.
+
+**Cómo se cuentan los elementos.** Según la definición del proyecto, las caras pueden ser planas o curvas:
+
+| Cuerpo | Caras | Aristas | Vértices |
+|---|---|---|---|
+| Cubo | 6 | 12 | 8 |
+| Prisma rectangular | 6 | 12 | 8 |
+| Pirámide de base cuadrada | 5 | 8 | 5 |
+| Cilindro | 3 (2 planas y 1 curva) | 2 | 0 |
+| Cono | 2 (1 plana y 1 curva) | 1 | 1 |
+| Esfera | 1 (curva) | 0 | 0 |
+
+### Construir
+
+1. **Elegir el lugar:** Aula, Patio, Biblioteca, Dirección, Secretaría, Baños, Hall, Entrada, Gimnasio, Comedor o *Mi propio espacio*, al que el alumno le pone nombre.
+2. **Construcción:**
    - **Izquierda:** los seis cuerpos. Con un toque se agregan a la maqueta.
    - **Centro:** la escena 3D. Arrastrar un cuerpo lo mueve por el piso. Si se lo suelta sobre otro cuerpo, queda apoyado encima; así se arma un techo sobre una pared. Arrastrar el fondo gira la cámara. La rueda del mouse o el gesto de pellizcar acercan y alejan.
-   - **Derecha:** si no hay nada elegido, aparecen las **ideas del lugar** (por ejemplo "Pizarrón → prisma rectangular"). Son ayudas, y al tocarlas se agrega el cuerpo ya preparado. Si hay un cuerpo elegido, aparecen su **ficha**, el nombre, y los controles para mover, cambiar el tamaño, girar, pintar, elegir textura, copiar y borrar.
-   - **Abajo:** Deshacer, Rehacer, las cuatro vistas (3D, desde arriba, de frente y de costado), Explorar y Nuevo proyecto.
-4. **Explorar:** se esconden los paneles de edición y la maqueta se recorre con controles más grandes.
-5. **Desafíos geométricos:** hay siete consignas. Cuando se cumple una, aparece un mensaje positivo. El botón "¡Terminé!" da una pista amable si todavía falta algo. No hay mensajes negativos ni penalizaciones.
-6. **¿Rueda o no rueda?:** se arrastra cada cuerpo al grupo correcto, o se toca el cuerpo y después el grupo. Si se equivoca, la ficha vuelve con una pregunta para pensar. Al terminar aparece una explicación sencilla.
-7. **Mostrar mi maqueta:** muestra el nombre del lugar, cuántos cuerpos se usaron y de qué tipos, para qué se usó cada uno y las cuatro vistas. El botón **"Guardar mi maqueta en Drive"** pide el nombre del alumno y el grado (2ºA o 2ºB). Después guarda en la carpeta de Drive del proyecto las 4 vistas, como imágenes separadas, y la maqueta 360°. Cada imagen lleva un título con el grado, el lugar, el nombre y la vista.
-8. **Ver maquetas:** es una galería con las maquetas guardadas, que se pueden filtrar por grado y por lugar. Al tocar una, se abre en 3D **solo para mirar**: se puede girar, acercar y cambiar de vista, y aparece un resumen de los cuerpos usados. Está pensada para que la usen los alumnos y sus familias.
+   - **Derecha:** si no hay nada elegido, aparecen las **ideas del lugar** (por ejemplo "Pizarrón → prisma rectangular"). Al tocarlas se agrega el cuerpo ya preparado. Si hay un cuerpo elegido, aparecen su nombre y los controles para mover, cambiar el tamaño, girar, pintar, elegir textura, copiar y borrar. La ficha de cada cuerpo está ahora en Conceptos.
+   - **Arriba:** 💾 **Guardar maqueta**. Abre una ventana con las 4 vistas y la cantidad de cuerpos usados. Desde ahí se guarda en Drive con el nombre y el grado (ver más abajo).
+   - **Abajo:** Deshacer, Rehacer, las cuatro vistas (3D, desde arriba, de frente y de costado), 🔭 **Mostrar maqueta** y 🏠 **Volver al inicio**.
+3. **Mostrar maqueta:** se esconden los paneles de edición y la maqueta se recorre con controles más grandes. El botón cambia a "Seguir construyendo".
+4. **Volver al inicio:** vuelve a la pantalla de las tres tarjetas. Si hay cuerpos en la maqueta, primero pide confirmación y recuerda guardarla.
+
+### Ver maquetas
+
+Es una galería con las maquetas guardadas, que se pueden filtrar por grado y por lugar. Al tocar una, se abre en 3D **solo para mirar**: se puede girar, acercar y cambiar de vista, y aparece un resumen de los cuerpos usados. Está pensada para alumnos y familias.
 
 ### Detalles pensados para 2.º grado
 
@@ -155,6 +192,13 @@ Todo lo que se puede cambiar está al principio de `script.js`, en la sección *
   ```
   En `d.cuenta` está cuántos cuerpos hay de cada tipo (`prisma`, `cubo`, `cilindro`, `esfera`, `cono`, `piramide`), y en `d.tipos` cuántos tipos distintos se usaron.
 - **`MENSAJE_LOGRO`**: el mensaje que aparece al cumplir un desafío.
+- **`OBJETOS_ASOCIAR`**: los objetos de la actividad Asociar. Cada uno tiene emoji, nombre, artículo y cuerpo. Por ejemplo, para agregar una vela:
+  ```js
+  { emoji: '🕯️', nombre: 'vela', art: 'la', cuerpo: 'cilindro' }
+  ```
+  La pirámide tiene un solo objeto (⛺ carpa), porque casi no hay emojis con esa forma.
+- **`NOMBRES_ACEPTADOS`**: las respuestas válidas de "Escribir el nombre". Se escriben en minúscula y sin tilde.
+- **`ESPACIO_LIBRE`**: el lugar donde se construyen los desafíos.
 - **`URL_GUARDADO`**: la dirección del script de Google que guarda en Drive.
 - **`GRADOS`**: las divisiones que aparecen al guardar. Si hace falta, se agrega una, por ejemplo `'2ºC'`.
 - **`VISTAS_A_GUARDAR`**: el orden de las vistas, que define los números 1 a 4 del nombre del archivo.
@@ -163,4 +207,6 @@ Todo lo que se puede cambiar está al principio de `script.js`, en la sección *
 La carpeta de destino se cambia en `guardar-en-drive.gs`, en la línea `CARPETA_ID`. Después hay que publicar una nueva versión del script.
 
 Los colores generales de la interfaz están en las variables de `:root`, al principio de `styles.css`.
+
+
 
