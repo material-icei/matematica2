@@ -2844,7 +2844,8 @@
     $('#input-alumno').addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmarGuardado(); });
     $('#btn-guardar-confirmar').addEventListener('click', confirmarGuardado);
     $('#btn-guardar-reintentar').addEventListener('click', guardarVistasEnDrive);
-    $('#btn-guardar-volver').addEventListener('click', () => abrirVentana('ventana-maqueta'));
+    // Cierra la ventana de guardado y vuelve directo a la maqueta para seguir editando
+    $('#btn-guardar-volver').addEventListener('click', () => cerrarVentana('ventana-guardar'));
 
     // Botones "cerrar" y clic en el fondo oscuro
     $$('[data-cerrar]').forEach((b) => b.addEventListener('click', () => b.closest('.ventana').classList.add('oculto')));
