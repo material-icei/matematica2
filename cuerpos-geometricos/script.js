@@ -353,7 +353,12 @@
      URL_GUARDADO: dirección de la "aplicación web" de Google Apps Script
      que guarda las imágenes en la carpeta de Drive (ver README.md).
      La carpeta de destino se define dentro de ese script, no acá. */
-  const URL_GUARDADO = 'https://script.google.com/macros/s/AKfycbxWmYYOS-YhxOSccATicOVlQytuoCdl5km3DbH69nYVtcgzttZEC8E4qC9UfCyj951MkQ/exec';
+  const URL_GUARDADO = '';
+
+  /* Botón "Seguir construyendo" en Ver maquetas.
+     true  = se puede seguir editando una maqueta guardada.
+     false = las maquetas quedan terminadas: solo se pueden mirar. */
+  const PERMITIR_SEGUIR_CONSTRUYENDO = true;
 
   /* Grados que el alumno puede elegir al guardar */
   const GRADOS = ['2ºA', '2ºB'];
@@ -377,6 +382,7 @@
     modo: 'construir',       // 'construir' o 'explorar'
     elegirVarios: false,     // modo para elegir varios cuerpos con toques
     desafioActivo: null,
+    maquetaContinuada: null, // alumno, grado y lugar si se sigue una maqueta guardada
     desafiosLogrados: new Set(),
     siguienteId: 1
   };
@@ -1590,6 +1596,7 @@
   /* Empieza a construir un lugar con la maqueta vacía */
   function empezarLugar(lugar) {
     estado.lugar = lugar;
+    estado.maquetaContinuada = null;
     estado.objetos.slice().forEach(quitarMesh);
     estado.seleccion = [];
     estado.desafioActivo = null;
@@ -2414,6 +2421,10 @@
   function abrirGuardar() {
     $('#input-alumno').value = alumno.nombre;
     $('#guardar-aviso').textContent = '';
+    // Si es una maqueta que se siguió desde "Ver maquetas", se avisa que se va a actualizar
+    const c = estado.maquetaContinuada;
+    $('#guardar-nota').classList.toggle('oculto', !c || c.lugar !== estado.lugar.nombre);
+    if (c) $('#guardar-nota').textContent = `Si guardás con el nombre ${c.alumno} y el grado ${c.grado}, se actualiza la maqueta que ya estaba guardada.`;
     $('#guardar-formulario').classList.remove('oculto');
     $('#guardar-progreso').classList.add('oculto');
     $('#ventana-guardar .btn-cerrar').classList.remove('oculto');
@@ -2499,6 +2510,7 @@
      15 b. VER MAQUETAS (galería y visor 360° para familias)
      ========================================================= */
   let maquetasGuardadas = [];                 // lista que llega desde Drive
+  let maquetaAbierta = null;                  // alumno y grado de la maqueta que se está mirando
   const filtros = { grado: 'todos', lugar: 'todos' };
 
   /* Pide datos al script de Google con una consulta GET */
@@ -2636,6 +2648,7 @@
 
     const alumnoTexto = String(maqueta.alumno || '').slice(0, 40);
     const gradoTexto = String(maqueta.grado || '').slice(0, 10);
+    maquetaAbierta = { alumno: alumnoTexto, grado: gradoTexto };
     $('#chip-lugar').textContent = `${lugar.emoji} ${lugar.nombre} – ${alumnoTexto} (${gradoTexto})`;
 
     // Resumen de los cuerpos usados, para leer mientras se mira la maqueta
@@ -2651,6 +2664,25 @@
     ajustarTamanio();
     aplicarVista('libre', true);
     $('#escena-vacia').classList.add('oculto');
+  }
+
+  /* Pasa la maqueta que se está mirando al modo construir, para seguir editándola.
+     Al guardarla con el mismo nombre, grado y lugar, reemplaza la maqueta 360° anterior. */
+  function continuarMaqueta() {
+    if (!maquetaAbierta) return;
+    document.body.classList.remove('modo-visor');
+    estado.seleccion = [];
+    estado.siguienteId = estado.objetos.reduce((max, m) => Math.max(max, m.userData.id), 0) + 1;
+    pilaDeshacer.length = 0;
+    pilaRehacer.length = 0;
+    // Se completan el nombre y el grado para que al guardar se actualice la misma maqueta
+    alumno.nombre = maquetaAbierta.alumno;
+    alumno.grado = GRADOS.includes(maquetaAbierta.grado) ? maquetaAbierta.grado : '';
+    estado.maquetaContinuada = Object.assign({ lugar: estado.lugar.nombre }, maquetaAbierta);
+    $('#chip-lugar').textContent = `${estado.lugar.emoji} ${estado.lugar.nombre}`;
+    cambiarModo('construir');
+    despuesDeCambiar();
+    avisar(`✏️ Seguís la maqueta de ${maquetaAbierta.alumno || 'tu compañero'}`, 2500);
   }
 
   function cerrarVisor() {
@@ -2752,6 +2784,7 @@
 
   /* Borra la maqueta y vuelve al menú de 3 tarjetas */
   function volverAlMenu() {
+    estado.maquetaContinuada = null;
     estado.objetos.slice().forEach(quitarMesh);
     estado.seleccion = [];
     estado.desafioActivo = null;
@@ -2782,6 +2815,11 @@
     // Ver maquetas guardadas
     $('#btn-ver-maquetas').addEventListener('click', abrirGaleria);
     $('#btn-volver-galeria').addEventListener('click', cerrarVisor);
+    if (PERMITIR_SEGUIR_CONSTRUYENDO) {
+      $('#btn-continuar-maqueta').addEventListener('click', continuarMaqueta);
+    } else {
+      $('#btn-continuar-maqueta').remove();   // las maquetas quedan terminadas
+    }
     $('#filtro-grado').addEventListener('click', (e) => {
       const b = e.target.closest('[data-filtro-grado]');
       if (!b) return;
