@@ -273,7 +273,6 @@
     { emoji: '🍦', nombre: 'cucurucho', art: 'el', cuerpo: 'cono' },
     { emoji: '🥕', nombre: 'zanahoria', art: 'la', cuerpo: 'cono' },
     { emoji: '🎉', nombre: 'cono de cotillón', art: 'el', cuerpo: 'cono' },
-    { emoji: '⛺', nombre: 'carpa', art: 'la', cuerpo: 'piramide' }
   ];
 
   /* Actividad "Escribir el nombre": respuestas aceptadas
@@ -353,8 +352,9 @@
      URL_GUARDADO: dirección de la "aplicación web" de Google Apps Script
      que guarda las imágenes en la carpeta de Drive (ver README.md).
      La carpeta de destino se define dentro de ese script, no acá. */
-  const URL_GUARDADO = '';
+  const URL_GUARDADO = 'https://script.google.com/macros/s/AKfycbxWmYYOS-YhxOSccATicOVlQytuoCdl5km3DbH69nYVtcgzttZEC8E4qC9UfCyj951MkQ/exec';
 
+   /*-------------Ver maquetas SEGUIR CONSTRUYENDO-------------------------------*/
   /* Botón "Seguir construyendo" en Ver maquetas.
      true  = se puede seguir editando una maqueta guardada.
      false = las maquetas quedan terminadas: solo se pueden mirar. */
