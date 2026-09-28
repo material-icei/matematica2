@@ -82,7 +82,9 @@ Todas las actividades tienen puntitos de avance, mensajes positivos y el botón 
 
 ### Ver maquetas
 
-Es una galería con las maquetas guardadas, que se pueden filtrar por grado y por lugar. Al tocar una, se abre en 3D **solo para mirar**: se puede girar, acercar y cambiar de vista, y aparece un resumen de los cuerpos usados. Está pensada para alumnos y familias.
+Es una galería con las maquetas guardadas, que se pueden filtrar por grado y por lugar. Al tocar una, se abre en 3D: se puede girar, acercar y cambiar de vista, y aparece un resumen de los cuerpos usados. Está pensada para alumnos y familias.
+
+Con el botón ✏️ **Seguir construyendo**, la maqueta pasa al modo construir con todos sus cuerpos y se puede seguir editando. El nombre y el grado quedan completados. Al tocar "Guardar maqueta", un aviso explica que, si se guarda con el mismo nombre y grado, **se actualiza la maqueta que ya estaba** (la versión anterior del `.json` va a la papelera de Drive). Si se cambia el nombre, se guarda como una maqueta nueva y la original queda igual. Las imágenes PNG de cada guardado se acumulan en la carpeta.
 
 ### Detalles pensados para 2.º grado
 
@@ -207,6 +209,8 @@ Todo lo que se puede cambiar está al principio de `script.js`, en la sección *
 La carpeta de destino se cambia en `guardar-en-drive.gs`, en la línea `CARPETA_ID`. Después hay que publicar una nueva versión del script.
 
 Los colores generales de la interfaz están en las variables de `:root`, al principio de `styles.css`.
+
+
 
 
 
