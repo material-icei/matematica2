@@ -75,7 +75,7 @@ Todas las actividades tienen puntitos de avance, mensajes positivos y el botón 
    - **Izquierda:** los seis cuerpos. Con un toque se agregan a la maqueta.
    - **Centro:** la escena 3D. Arrastrar un cuerpo lo mueve por el piso. Si se lo suelta sobre otro cuerpo, queda apoyado encima; así se arma un techo sobre una pared. Arrastrar el fondo gira la cámara. La rueda del mouse o el gesto de pellizcar acercan y alejan.
    - **Derecha:** si no hay nada elegido, aparecen las **ideas del lugar** (por ejemplo "Pizarrón → prisma rectangular"). Al tocarlas se agrega el cuerpo ya preparado. Si hay un cuerpo elegido, aparecen su nombre y los controles para mover, cambiar el tamaño, girar, pintar, elegir textura, copiar y borrar. La ficha de cada cuerpo está ahora en Conceptos.
-   - **Arriba:** 💾 **Guardar maqueta**. Abre una ventana con las 4 vistas y la cantidad de cuerpos usados. Desde ahí se guarda en Drive con el nombre y el grado (ver más abajo).
+   - **Arriba:** 💾 **Guardar maqueta**. Abre una ventana con las 4 vistas (solo para mirarlas en pantalla) y la cantidad de cuerpos usados. Desde ahí se guarda en Drive la maqueta 360°, con el nombre y el grado (ver más abajo).
    - **Abajo:** Deshacer, Rehacer, las cuatro vistas (3D, desde arriba, de frente y de costado), 🔭 **Mostrar maqueta** y 🏠 **Volver al inicio**.
 3. **Mostrar maqueta:** se esconden los paneles de edición y la maqueta se recorre con controles más grandes. El botón cambia a "Seguir construyendo".
 4. **Volver al inicio:** vuelve a la pantalla de las tres tarjetas. Si hay cuerpos en la maqueta, primero pide confirmación y recuerda guardarla.
@@ -84,7 +84,7 @@ Todas las actividades tienen puntitos de avance, mensajes positivos y el botón 
 
 Es una galería con las maquetas guardadas, que se pueden filtrar por grado y por lugar. Al tocar una, se abre en 3D: se puede girar, acercar y cambiar de vista, y aparece un resumen de los cuerpos usados. Está pensada para alumnos y familias.
 
-Con el botón ✏️ **Seguir construyendo**, la maqueta pasa al modo construir con todos sus cuerpos y se puede seguir editando. El nombre y el grado quedan completados. Al tocar "Guardar maqueta", un aviso explica que, si se guarda con el mismo nombre y grado, **se actualiza la maqueta que ya estaba** (la versión anterior del `.json` va a la papelera de Drive). Si se cambia el nombre, se guarda como una maqueta nueva y la original queda igual. Las imágenes PNG de cada guardado se acumulan en la carpeta.
+Con el botón ✏️ **Seguir construyendo**, la maqueta pasa al modo construir con todos sus cuerpos y se puede seguir editando. El nombre y el grado quedan completados. Al tocar "Guardar maqueta", un aviso explica que, si se guarda con el mismo nombre y grado, **se actualiza la maqueta que ya estaba** (la versión anterior del `.json` va a la papelera de Drive). Si se cambia el nombre, se guarda como una maqueta nueva y la original queda igual.
 
 ### Detalles pensados para 2.º grado
 
@@ -108,27 +108,21 @@ Con el botón ✏️ **Seguir construyendo**, la maqueta pasa al modo construir 
 
 ## Guardar las maquetas en Google Drive
 
-### Cómo se llaman los archivos
+### Qué se guarda
 
-Cada maqueta genera 5 archivos. Hay 4 imágenes PNG, con el formato `grado-lugar-nombre-número.png`, y un archivo con la maqueta 360°. Por ejemplo:
+Cada maqueta se guarda como **un solo archivo**: la maqueta 360°, con el formato `grado-lugar-nombre-maqueta.json`. Por ejemplo: `2ºB-Biblioteca-Juana Pérez-maqueta.json`.
 
-| Número | Vista | Ejemplo |
-|---|---|---|
-| 1 | Vista 3D | `2ºB-Biblioteca-Juana Pérez-1.png` |
-| 2 | Desde arriba | `2ºB-Biblioteca-Juana Pérez-2.png` |
-| 3 | De frente | `2ºB-Biblioteca-Juana Pérez-3.png` |
-| 4 | De costado | `2ºB-Biblioteca-Juana Pérez-4.png` |
-| — | Maqueta 360° | `2ºB-Biblioteca-Juana Pérez-maqueta.json` |
+Ya no se guardan imágenes PNG de las vistas, porque desde "Ver maquetas" la maqueta se puede mirar en 3D desde cualquier lado. Así el guardado tarda un par de segundos.
 
 ### El archivo de la maqueta 360°
 
-El `.json` no es una foto: es la "receta" de la maqueta. Guarda cada cuerpo con su tipo, posición, giro, tamaño, color, textura y nombre. También incluye el grado, el alumno, el lugar, la fecha y una miniatura chica para la galería. El visor usa esa receta para volver a armar la maqueta en 3D exactamente como estaba, así que se puede mirar desde cualquier lado. Pesa pocos KB, mucho menos que una imagen.
+El `.json` no es una foto: es la "receta" de la maqueta. Guarda cada cuerpo con su tipo, posición, giro, tamaño, color, textura y nombre. También incluye el grado, el alumno, el lugar, la fecha y una miniatura chica para la galería. El visor usa esa receta para volver a armar la maqueta en 3D exactamente como estaba. Pesa pocos KB.
 
-Si un alumno vuelve a guardar la misma maqueta con el mismo nombre, grado y lugar, el `.json` nuevo **reemplaza** al anterior; el viejo va a la papelera de Drive. Así la galería muestra siempre la última versión. Las PNG, en cambio, se acumulan.
+Si un alumno vuelve a guardar la misma maqueta con el mismo nombre, grado y lugar, el `.json` nuevo **reemplaza** al anterior; el viejo va a la papelera de Drive. Así la galería muestra siempre la última versión.
 
-Si una imagen no se puede guardar (por ejemplo, porque se cortó internet), la app lo muestra y ofrece "Probar otra vez". Al reintentar, solo vuelve a enviar las que faltaron. El nombre y el grado se recuerdan mientras la página esté abierta, así el alumno no tiene que volver a escribirlos.
+### Si falla el guardado
 
-Si un alumno guarda dos veces la misma maqueta, Drive guarda las dos copias con el mismo nombre; no se borra nada.
+La primera vez que se usa en el día, el script de Google puede tardar en responder. Por eso la app **reintenta sola hasta 3 veces**, esperando un poco entre cada intento. Si aun así no se puede guardar (por ejemplo, porque se cortó internet), muestra "Probar otra vez". El nombre y el grado se recuerdan mientras la página esté abierta, así el alumno no tiene que volver a escribirlos.
 
 ### Por qué hace falta un paso extra
 
@@ -203,14 +197,10 @@ Todo lo que se puede cambiar está al principio de `script.js`, en la sección *
 - **`ESPACIO_LIBRE`**: el lugar donde se construyen los desafíos.
 - **`URL_GUARDADO`**: la dirección del script de Google que guarda en Drive.
 - **`GRADOS`**: las divisiones que aparecen al guardar. Si hace falta, se agrega una, por ejemplo `'2ºC'`.
-- **`VISTAS_A_GUARDAR`**: el orden de las vistas, que define los números 1 a 4 del nombre del archivo.
 - **`GRADOS`** también define los botones de filtro de la galería.
 
 La carpeta de destino se cambia en `guardar-en-drive.gs`, en la línea `CARPETA_ID`. Después hay que publicar una nueva versión del script.
 
 Los colores generales de la interfaz están en las variables de `:root`, al principio de `styles.css`.
-
-
-
 
 
