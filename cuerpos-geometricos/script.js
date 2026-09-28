@@ -361,12 +361,8 @@
   const PERMITIR_SEGUIR_CONSTRUYENDO = true;
     /*-----------------------------------------------------------------------------------*/
 
-   
   /* Grados que el alumno puede elegir al guardar */
   const GRADOS = ['2ºA', '2ºB'];
-
-  /* Orden y número de cada vista en el nombre del archivo (…-1.png a …-4.png) */
-  const VISTAS_A_GUARDAR = ['libre', 'arriba', 'frente', 'costado'];
 
   const TAMANIO_BASE = 24;       // lado de la base de la maqueta
   const PASO_MOVER = 0.5;        // cuánto se mueve con cada toque
@@ -374,8 +370,6 @@
   const FACTOR_TAMANIO = 1.15;   // cuánto agranda/achica cada toque
   const MAX_PASOS_DESHACER = 80;
 
-
-   
   /* =========================================================
      2. ESTADO DE LA APP
      ========================================================= */
@@ -2348,49 +2342,19 @@
     });
   }
 
-  /* Arma la imagen de una vista con un título arriba (grado, lugar, nombre y vista) */
-  async function imagenConTitulo(id) {
-    const foto = await cargarImagen(fotosVistas[id]);
-    const ancho = 1600, alto = 1000, cabecera = 100, margen = 20;
-    const lienzo = document.createElement('canvas');
-    lienzo.width = ancho + margen * 2;
-    lienzo.height = cabecera + alto + margen * 2;
-    const ctx = lienzo.getContext('2d');
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, lienzo.width, lienzo.height);
-    ctx.fillStyle = '#1f2a44';
-    ctx.font = '700 48px "Baloo 2", sans-serif';
-    ctx.textBaseline = 'middle';
-    const titulo = `${alumno.grado} – ${estado.lugar.nombre} – ${alumno.nombre} (${VISTAS[id].nombre.toLowerCase()})`;
-    ctx.fillText(titulo, margen + 8, cabecera / 2 + margen / 2);
-    ctx.drawImage(foto, margen, cabecera + margen, ancho, alto);
-    ctx.strokeStyle = '#1f2a44';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(margen, cabecera + margen, ancho, alto);
-    return lienzo.toDataURL('image/png');
-  }
-
-  /* ---------- Guardar las 4 vistas en Google Drive ---------- */
+  /* ---------- Guardar la maqueta 360° en Google Drive ---------- */
 
   // Datos del alumno: se recuerdan mientras la página esté abierta
   const alumno = { nombre: '', grado: '' };
-  let subidas = [];   // estado de cada imagen: 'espera', 'subiendo', 'ok' o 'error'
 
   /* Quita caracteres que no pueden ir en un nombre de archivo */
   const limpiarParaArchivo = (texto) => texto.trim().replace(/\s+/g, ' ').replace(/[\\/:*?"<>|#%]/g, '');
 
-  /* Nombre del archivo: "grado-sector-nombre-x.png" (o "…-maqueta.json" para la vista 360°) */
-  function nombreDelArchivo(sufijo, extension) {
-    return [alumno.grado, estado.lugar.nombre, alumno.nombre, sufijo]
-      .map((t) => limpiarParaArchivo(String(t))).join('-') + '.' + (extension || 'png');
+  /* Nombre del archivo: "grado-sector-nombre-maqueta.json" */
+  function nombreDelArchivo() {
+    return [alumno.grado, estado.lugar.nombre, alumno.nombre, 'maqueta']
+      .map((t) => limpiarParaArchivo(String(t))).join('-') + '.json';
   }
-
-  /* Qué se guarda: las 4 vistas (PNG) y la maqueta 360° (JSON) */
-  const TAREAS_GUARDADO = VISTAS_A_GUARDAR.concat(['maqueta']);
-
-  const nombreDeTarea = (tarea, i) => (tarea === 'maqueta'
-    ? nombreDelArchivo('maqueta', 'json')
-    : nombreDelArchivo(i + 1));
 
   /* Miniatura chica (JPG) para la galería del visualizador */
   async function miniaturaDeMaqueta() {
@@ -2437,28 +2401,42 @@
     $('#input-alumno').focus();
   }
 
-  function dibujarProgreso() {
-    const iconos = { espera: '⏳', subiendo: '☁️', ok: '✅', error: '⚠️' };
-    const textos = { espera: 'Esperando…', subiendo: 'Guardando…', ok: 'Guardada', error: 'No se guardó' };
-    $('#lista-progreso').innerHTML = TAREAS_GUARDADO.map((tarea, i) => `
-      <li class="${subidas[i]}">
-        <span class="icono-progreso" aria-hidden="true">${iconos[subidas[i]]}</span>
-        <span><strong>${tarea === 'maqueta' ? 'Maqueta para ver en 360°' : VISTAS[tarea].nombre}</strong>: ${textos[subidas[i]]}
-          <small>${escaparHTML(nombreDeTarea(tarea, i))}</small></span>
-      </li>`).join('');
+  /* Muestra el estado del guardado: 'subiendo', 'ok' o 'error' */
+  function dibujarProgreso(estadoGuardado) {
+    const iconos = { subiendo: '☁️', ok: '✅', error: '⚠️' };
+    const textos = { subiendo: 'Guardando…', ok: 'Guardada', error: 'No se guardó' };
+    $('#lista-progreso').innerHTML = `
+      <li class="${estadoGuardado}">
+        <span class="icono-progreso" aria-hidden="true">${iconos[estadoGuardado]}</span>
+        <span><strong>Maqueta para ver en 360°</strong>: ${textos[estadoGuardado]}
+          <small>${escaparHTML(nombreDelArchivo())}</small></span>
+      </li>`;
   }
 
-  /* Envía un archivo al script de Google (Apps Script) que lo guarda en la carpeta.
-     "datos" lleva la imagen (PNG) o el contenido (JSON). */
-  async function subirArchivo(nombreArchivo, datos) {
-    const respuesta = await fetch(URL_GUARDADO, {
-      method: 'POST',
-      // "text/plain" evita la consulta previa del navegador, que Apps Script no acepta
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(Object.assign({ nombreArchivo }, datos))
-    });
-    const resultado = await respuesta.json();
-    if (!resultado.ok) throw new Error(resultado.error || 'No se pudo guardar');
+  const esperar = (ms) => new Promise((resolver) => setTimeout(resolver, ms));
+
+  /* Envía la maqueta al script de Google (Apps Script) que la guarda en la carpeta.
+     Si falla (por ejemplo, porque el script tarda en "despertar"),
+     lo vuelve a intentar solo, hasta 3 veces. */
+  async function subirArchivo(nombreArchivo, contenido) {
+    let ultimoError = null;
+    for (let intento = 1; intento <= 3; intento++) {
+      try {
+        const respuesta = await fetch(URL_GUARDADO, {
+          method: 'POST',
+          // "text/plain" evita la consulta previa del navegador, que Apps Script no acepta
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ nombreArchivo, contenido })
+        });
+        const resultado = await respuesta.json();
+        if (resultado.ok) return;
+        ultimoError = new Error(resultado.error || 'No se pudo guardar');
+      } catch (error) {
+        ultimoError = error;
+      }
+      if (intento < 3) await esperar(intento * 1500);
+    }
+    throw ultimoError;
   }
 
   /* Revisa los datos del alumno y empieza a guardar */
@@ -2470,44 +2448,34 @@
     if (!URL_GUARDADO) { aviso.textContent = 'El guardado en Drive todavía no está preparado. Avisale a tu docente.'; return; }
     if (!navigator.onLine) { aviso.textContent = 'No hay internet en este momento. Probá de nuevo en un ratito.'; return; }
     alumno.nombre = nombre.slice(0, 40);
-    subidas = TAREAS_GUARDADO.map(() => 'espera');
     $('#guardar-formulario').classList.add('oculto');
     $('#guardar-progreso').classList.remove('oculto');
-    guardarVistasEnDrive();
+    guardarMaquetaEnDrive();
   }
 
-  /* Guarda uno por uno los archivos que todavía no se guardaron */
-  async function guardarVistasEnDrive() {
+  /* Guarda la maqueta 360° (un solo archivo chico) */
+  async function guardarMaquetaEnDrive() {
     $('#ventana-guardar .btn-cerrar').classList.add('oculto');
     $('#btn-guardar-reintentar').classList.add('oculto');
     $('#btn-guardar-volver').disabled = true;
     $('#guardar-resultado').textContent = 'Guardando tu maqueta… no cierres esta ventana.';
+    dibujarProgreso('subiendo');
 
-    for (let i = 0; i < TAREAS_GUARDADO.length; i++) {
-      if (subidas[i] === 'ok') continue;
-      const tarea = TAREAS_GUARDADO[i];
-      subidas[i] = 'subiendo';
-      dibujarProgreso();
-      try {
-        const datos = tarea === 'maqueta'
-          ? { contenido: await maquetaComoTexto() }
-          : { imagen: await imagenConTitulo(tarea) };
-        await subirArchivo(nombreDeTarea(tarea, i), datos);
-        subidas[i] = 'ok';
-      } catch (error) {
-        subidas[i] = 'error';
-      }
-      dibujarProgreso();
+    let guardada = true;
+    try {
+      await subirArchivo(nombreDelArchivo(), await maquetaComoTexto());
+    } catch (error) {
+      guardada = false;
     }
 
-    const todasOk = subidas.every((e) => e === 'ok');
-    $('#guardar-resultado').textContent = todasOk
+    dibujarProgreso(guardada ? 'ok' : 'error');
+    $('#guardar-resultado').textContent = guardada
       ? `¡Listo, ${alumno.nombre}! Tu maqueta quedó guardada. Tu familia la puede ver en «Ver maquetas».`
-      : 'Algunas partes no se pudieron guardar. Tocá «Probar otra vez». Si sigue pasando, avisale a tu docente.';
-    $('#btn-guardar-reintentar').classList.toggle('oculto', todasOk);
+      : 'No se pudo guardar. Revisá que haya internet y tocá «Probar otra vez». Si sigue pasando, avisale a tu docente.';
+    $('#btn-guardar-reintentar').classList.toggle('oculto', guardada);
     $('#btn-guardar-volver').disabled = false;
     $('#ventana-guardar .btn-cerrar').classList.remove('oculto');
-    if (todasOk) avisar('☁️ Maqueta guardada en Drive');
+    if (guardada) avisar('☁️ Maqueta guardada en Drive');
   }
 
   /* =========================================================
@@ -2885,7 +2853,7 @@
     });
     $('#input-alumno').addEventListener('keydown', (e) => { if (e.key === 'Enter') confirmarGuardado(); });
     $('#btn-guardar-confirmar').addEventListener('click', confirmarGuardado);
-    $('#btn-guardar-reintentar').addEventListener('click', guardarVistasEnDrive);
+    $('#btn-guardar-reintentar').addEventListener('click', guardarMaquetaEnDrive);
     // Cierra la ventana de guardado y vuelve directo a la maqueta para seguir editando
     $('#btn-guardar-volver').addEventListener('click', () => cerrarVentana('ventana-guardar'));
 
