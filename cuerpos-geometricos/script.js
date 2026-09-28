@@ -354,12 +354,14 @@
      La carpeta de destino se define dentro de ese script, no acá. */
   const URL_GUARDADO = 'https://script.google.com/macros/s/AKfycbxWmYYOS-YhxOSccATicOVlQytuoCdl5km3DbH69nYVtcgzttZEC8E4qC9UfCyj951MkQ/exec';
 
-   /*-------------Ver maquetas SEGUIR CONSTRUYENDO-------------------------------*/
-  /* Botón "Seguir construyendo" en Ver maquetas.
-     true  = se puede seguir editando una maqueta guardada.
-     false = las maquetas quedan terminadas: solo se pueden mirar. */
+   
+   /*-------------Ver maquetas - botón SEGUIR CONSTRUYENDO-------------------------------*/
+  /* true  = se puede seguir editando una maqueta guardada. HABILITA botón Seguir editando
+     false = las maquetas quedan terminadas: solo se pueden mirar. DESHABILITA botón Seguir editando */
   const PERMITIR_SEGUIR_CONSTRUYENDO = true;
+    /*-----------------------------------------------------------------------------------*/
 
+   
   /* Grados que el alumno puede elegir al guardar */
   const GRADOS = ['2ºA', '2ºB'];
 
@@ -372,6 +374,8 @@
   const FACTOR_TAMANIO = 1.15;   // cuánto agranda/achica cada toque
   const MAX_PASOS_DESHACER = 80;
 
+
+   
   /* =========================================================
      2. ESTADO DE LA APP
      ========================================================= */
