@@ -1219,7 +1219,18 @@ body.modo-explorar .btn-cam small { font-size: 13px; }
 /* Visor: la escena solo para mirar */
 #btn-volver-galeria,
 .visor-info { display: none; }
-body.modo-visor #btn-volver-galeria { display: inline-flex; }
+#btn-continuar-maqueta { display: none; }
+body.modo-visor #btn-volver-galeria,
+body.modo-visor #btn-continuar-maqueta { display: inline-flex; }
+.guardar-nota {
+  margin: 4px 0 0;
+  background: var(--amarillo-claro);
+  border: 2px solid var(--tinta);
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 16px;
+  line-height: 1.35;
+}
 body.modo-visor .acciones-superiores,
 body.modo-visor #btn-modo,
 body.modo-visor #btn-nuevo,
