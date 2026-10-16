@@ -273,6 +273,7 @@
     { emoji: '🍦', nombre: 'cucurucho', art: 'el', cuerpo: 'cono' },
     { emoji: '🥕', nombre: 'zanahoria', art: 'la', cuerpo: 'cono' },
     { emoji: '🎉', nombre: 'cono de cotillón', art: 'el', cuerpo: 'cono' },
+    { emoji: '⛺', nombre: 'carpa', art: 'la', cuerpo: 'piramide' }
   ];
 
   /* Actividad "Escribir el nombre": respuestas aceptadas
@@ -352,14 +353,12 @@
      URL_GUARDADO: dirección de la "aplicación web" de Google Apps Script
      que guarda las imágenes en la carpeta de Drive (ver README.md).
      La carpeta de destino se define dentro de ese script, no acá. */
-  const URL_GUARDADO = 'https://script.google.com/macros/s/AKfycbxWmYYOS-YhxOSccATicOVlQytuoCdl5km3DbH69nYVtcgzttZEC8E4qC9UfCyj951MkQ/exec';
+  const URL_GUARDADO = '';
 
-   
-   /*-------------Ver maquetas - botón SEGUIR CONSTRUYENDO-------------------------------*/
-  /* true  = se puede seguir editando una maqueta guardada. HABILITA botón Seguir editando
-     false = las maquetas quedan terminadas: solo se pueden mirar. DESHABILITA botón Seguir editando */
+  /* Botón "Seguir construyendo" en Ver maquetas.
+     true  = se puede seguir editando una maqueta guardada.
+     false = las maquetas quedan terminadas: solo se pueden mirar. */
   const PERMITIR_SEGUIR_CONSTRUYENDO = true;
-    /*-----------------------------------------------------------------------------------*/
 
   /* Grados que el alumno puede elegir al guardar */
   const GRADOS = ['2ºA', '2ºB'];
@@ -2360,10 +2359,10 @@
   async function miniaturaDeMaqueta() {
     const foto = await cargarImagen(fotosVistas.libre);
     const lienzo = document.createElement('canvas');
-    lienzo.width = 480;
-    lienzo.height = 300;
-    lienzo.getContext('2d').drawImage(foto, 0, 0, 480, 300);
-    return lienzo.toDataURL('image/jpeg', 0.75);
+    lienzo.width = 320;
+    lienzo.height = 200;
+    lienzo.getContext('2d').drawImage(foto, 0, 0, 320, 200);
+    return lienzo.toDataURL('image/jpeg', 0.6);
   }
 
   /* Archivo de la maqueta 360°: la "receta" con todos los cuerpos */
@@ -2475,7 +2474,10 @@
     $('#btn-guardar-reintentar').classList.toggle('oculto', guardada);
     $('#btn-guardar-volver').disabled = false;
     $('#ventana-guardar .btn-cerrar').classList.remove('oculto');
-    if (guardada) avisar('☁️ Maqueta guardada en Drive');
+    if (guardada) {
+      avisar('☁️ Maqueta guardada en Drive');
+      galeriaCargada = false;   // la galería se vuelve a pedir para mostrar la maqueta nueva
+    }
   }
 
   /* =========================================================
@@ -2483,6 +2485,8 @@
      ========================================================= */
   let maquetasGuardadas = [];                 // lista que llega desde Drive
   let maquetaAbierta = null;                  // alumno y grado de la maqueta que se está mirando
+  let galeriaCargada = false;                 // true cuando la lista ya llegó una vez
+  let pedidoGaleria = null;                   // pedido en curso, para no repetirlo
   const filtros = { grado: 'todos', lugar: 'todos' };
 
   /* Pide datos al script de Google con una consulta GET */
@@ -2502,26 +2506,47 @@
     if (b) b.addEventListener('click', cargarGaleria);
   }
 
+  /* Si la lista ya se trajo antes (mientras la página está abierta),
+     se muestra al instante y se actualiza por detrás. */
   async function abrirGaleria() {
     mostrarPantalla('pantalla-galeria');
-    await cargarGaleria();
+    if (galeriaCargada) {
+      dibujarFiltros();
+      dibujarGaleria();
+      cargarGaleria(true);
+    } else {
+      await cargarGaleria(false);
+    }
   }
 
-  async function cargarGaleria() {
-    $('#galeria-lista').innerHTML = '';
+  /* enSegundoPlano: true = no borra lo que se está viendo mientras actualiza */
+  async function cargarGaleria(enSegundoPlano) {
     if (!URL_GUARDADO) {
+      $('#galeria-lista').innerHTML = '';
       mensajeGaleria('El visualizador todavía no está preparado: falta configurar el guardado en Drive.');
       return;
     }
-    mensajeGaleria('Buscando maquetas…');
-    try {
-      const datos = await consultarDrive({ accion: 'listar' });
-      maquetasGuardadas = Array.isArray(datos.maquetas) ? datos.maquetas : [];
-      dibujarFiltros();
-      dibujarGaleria();
-    } catch (error) {
-      mensajeGaleria('No se pudieron traer las maquetas. Revisá la conexión a internet.', true);
+    if (pedidoGaleria) return pedidoGaleria;   // ya se está pidiendo
+    if (!enSegundoPlano) {
+      $('#galeria-lista').innerHTML = '';
+      mensajeGaleria('⏳ Buscando maquetas…');
     }
+    pedidoGaleria = (async () => {
+      try {
+        const datos = await consultarDrive({ accion: 'listar' });
+        maquetasGuardadas = Array.isArray(datos.maquetas) ? datos.maquetas : [];
+        galeriaCargada = true;
+        if ($('#pantalla-galeria').classList.contains('activa')) {
+          dibujarFiltros();
+          dibujarGaleria();
+        }
+      } catch (error) {
+        if (!enSegundoPlano) mensajeGaleria('No se pudieron traer las maquetas. Revisá la conexión a internet.', true);
+      } finally {
+        pedidoGaleria = null;
+      }
+    })();
+    return pedidoGaleria;
   }
 
   function datosDeLugar(id, nombre) {
@@ -2594,7 +2619,13 @@
   }
 
   async function abrirMaquetaGuardada(id) {
-    mensajeGaleria('Abriendo la maqueta…');
+    // La lista ya trae los cuerpos: se abre al instante, sin volver a pedir a Drive
+    const enLista = maquetasGuardadas.find((m) => m.id === id);
+    if (enLista && Array.isArray(enLista.cuerpos)) {
+      mostrarEnVisor(enLista);
+      return;
+    }
+    mensajeGaleria('⏳ Abriendo la maqueta…');
     try {
       const { maqueta } = await consultarDrive({ accion: 'leer', id });
       mostrarEnVisor(maqueta);
