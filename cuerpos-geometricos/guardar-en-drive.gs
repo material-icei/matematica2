@@ -5,20 +5,24 @@
    Los pasos están en README.md.
 
    Hace tres cosas:
-   - Guardar (POST): recibe las 4 imágenes PNG y el archivo
-     de la maqueta 360° (JSON) y los guarda en la carpeta.
-   - Listar (GET ?accion=listar): devuelve las maquetas guardadas
-     para la galería "Ver maquetas".
-   - Leer (GET ?accion=leer&id=...): devuelve una maqueta para
-     verla en 3D.
+   - Guardar (POST): recibe la maqueta 360° (JSON), la guarda en la
+     carpeta y actualiza el ÍNDICE de maquetas.
+   - Listar (GET ?accion=listar): devuelve el índice completo
+     (datos, miniatura y cuerpos de cada maqueta) leyendo UN solo
+     archivo, así la galería carga rápido.
+   - Leer (GET ?accion=leer&id=...): devuelve una maqueta. Se usa
+     solo como respaldo, porque el índice ya trae los cuerpos.
    ========================================================= */
 
 // Carpeta de Drive donde se guardan las maquetas
 const CARPETA_ID = '1FCw5rEQmlJDBIuEKJbKuXsnhgMTZSDDW';
 
+// Archivo índice (se crea solo dentro de la carpeta; no hace falta tocarlo)
+const NOMBRE_INDICE = 'indice-maquetas.json';
+
 // Límites para evitar envíos extraños
 const TAMANIO_MAXIMO = 10 * 1024 * 1024;   // 10 MB por archivo
-const MAXIMO_MAQUETAS_EN_LISTA = 300;
+const MAXIMO_MAQUETAS = 300;
 
 /* ---------- GUARDAR ---------- */
 function doPost(e) {
@@ -27,32 +31,32 @@ function doPost(e) {
     const nombre = String(datos.nombreArchivo || '')
       .replace(/[\\/:*?"<>|#%]/g, '')
       .slice(0, 150);
-    const carpeta = DriveApp.getFolderById(CARPETA_ID);
+    if (!/-maqueta\.json$/i.test(nombre)) return responder({ ok: false, error: 'Tipo de archivo no permitido' });
 
-    // Maqueta 360° (JSON): si ya había una con el mismo nombre, se reemplaza
-    if (/\.json$/i.test(nombre)) {
-      const texto = String(datos.contenido || '');
-      if (!texto || texto.length > TAMANIO_MAXIMO) return responder({ ok: false, error: 'Maqueta vacía o demasiado grande' });
-      const maqueta = JSON.parse(texto);
-      if (maqueta.app !== 'construimos-escuela' || !Array.isArray(maqueta.cuerpos)) {
-        return responder({ ok: false, error: 'No es una maqueta válida' });
-      }
+    const texto = String(datos.contenido || '');
+    if (!texto || texto.length > TAMANIO_MAXIMO) return responder({ ok: false, error: 'Maqueta vacía o demasiado grande' });
+    const maqueta = JSON.parse(texto);
+    if (maqueta.app !== 'construimos-escuela' || !Array.isArray(maqueta.cuerpos)) {
+      return responder({ ok: false, error: 'No es una maqueta válida' });
+    }
+
+    // El candado evita que dos alumnos que guardan a la vez pisen el índice
+    const candado = LockService.getScriptLock();
+    candado.waitLock(20000);
+    try {
+      const carpeta = DriveApp.getFolderById(CARPETA_ID);
+      // Si ya había una maqueta con el mismo nombre, se reemplaza (la vieja va a la papelera)
       const anteriores = carpeta.getFilesByName(nombre);
       while (anteriores.hasNext()) anteriores.next().setTrashed(true);
-      carpeta.createFile(nombre, texto, 'application/json');
-      return responder({ ok: true, nombre: nombre });
-    }
+      const archivo = carpeta.createFile(nombre, texto, 'application/json');
 
-    // Imagen PNG de una vista
-    if (/\.png$/i.test(nombre)) {
-      const base64 = String(datos.imagen || '').replace(/^data:image\/png;base64,/, '');
-      const bytes = Utilities.base64Decode(base64);
-      if (!bytes.length || bytes.length > TAMANIO_MAXIMO) return responder({ ok: false, error: 'Imagen vacía o demasiado grande' });
-      carpeta.createFile(Utilities.newBlob(bytes, 'image/png', nombre));
-      return responder({ ok: true, nombre: nombre });
+      const indice = leerIndice(carpeta).filter(function (m) { return m.nombreArchivo !== nombre; });
+      indice.push(entradaDeIndice(archivo, maqueta));
+      guardarIndice(carpeta, indice);
+    } finally {
+      candado.releaseLock();
     }
-
-    return responder({ ok: false, error: 'Tipo de archivo no permitido' });
+    return responder({ ok: true, nombre: nombre });
   } catch (error) {
     return responder({ ok: false, error: String(error) });
   }
@@ -71,32 +75,86 @@ function doGet(e) {
   }
 }
 
-/* Devuelve los datos para la galería (sin los cuerpos, para que sea liviana) */
+/* Devuelve el índice. Antes revisa, solo por nombre y sin abrir archivos,
+   que coincida con la carpeta: quita las maquetas borradas a mano y agrega
+   las que falten (por ejemplo, las guardadas antes de que existiera el índice). */
 function listarMaquetas() {
-  const archivos = DriveApp.getFolderById(CARPETA_ID)
-    .searchFiles("title contains '-maqueta.json' and trashed = false");
-  const lista = [];
-  while (archivos.hasNext() && lista.length < MAXIMO_MAQUETAS_EN_LISTA) {
+  const carpeta = DriveApp.getFolderById(CARPETA_ID);
+  const enCarpeta = {};
+  const archivos = carpeta.searchFiles("title contains '-maqueta.json' and trashed = false");
+  while (archivos.hasNext()) {
     const archivo = archivos.next();
+    enCarpeta[archivo.getId()] = archivo;
+  }
+
+  const original = leerIndice(carpeta);
+  const indice = original.filter(function (m) { return enCarpeta[m.id]; });
+  const yaEstan = {};
+  indice.forEach(function (m) { yaEstan[m.id] = true; });
+
+  let agregadas = 0;
+  Object.keys(enCarpeta).forEach(function (id) {
+    if (yaEstan[id] || indice.length >= MAXIMO_MAQUETAS) return;
     try {
-      const m = JSON.parse(archivo.getBlob().getDataAsString());
-      if (m.app !== 'construimos-escuela') continue;
-      lista.push({
-        id: archivo.getId(),
-        grado: m.grado,
-        alumno: m.alumno,
-        lugar: m.lugar,
-        fecha: m.fecha,
-        cantidad: Array.isArray(m.cuerpos) ? m.cuerpos.length : 0,
-        miniatura: m.miniatura
-      });
+      const maqueta = JSON.parse(enCarpeta[id].getBlob().getDataAsString());
+      if (maqueta.app === 'construimos-escuela') {
+        indice.push(entradaDeIndice(enCarpeta[id], maqueta));
+        agregadas++;
+      }
     } catch (error) {
       // Si un archivo está dañado, se saltea
     }
-  }
+  });
+
+  if (agregadas || indice.length !== original.length) guardarIndice(carpeta, indice);
   // Las más nuevas primero
-  lista.sort(function (a, b) { return String(b.fecha).localeCompare(String(a.fecha)); });
-  return lista;
+  indice.sort(function (a, b) { return String(b.fecha).localeCompare(String(a.fecha)); });
+  return indice;
+}
+
+/* Datos de una maqueta para el índice (incluye los cuerpos, que pesan poco) */
+function entradaDeIndice(archivo, m) {
+  return {
+    id: archivo.getId(),
+    nombreArchivo: archivo.getName(),
+    grado: m.grado,
+    alumno: m.alumno,
+    lugar: m.lugar,
+    fecha: m.fecha,
+    cantidad: Array.isArray(m.cuerpos) ? m.cuerpos.length : 0,
+    miniatura: m.miniatura,
+    cuerpos: m.cuerpos
+  };
+}
+
+function leerIndice(carpeta) {
+  const archivos = carpeta.getFilesByName(NOMBRE_INDICE);
+  if (!archivos.hasNext()) return [];
+  try {
+    const datos = JSON.parse(archivos.next().getBlob().getDataAsString());
+    return Array.isArray(datos) ? datos : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function guardarIndice(carpeta, indice) {
+  const texto = JSON.stringify(indice);
+  const archivos = carpeta.getFilesByName(NOMBRE_INDICE);
+  if (archivos.hasNext()) archivos.next().setContent(texto);
+  else carpeta.createFile(NOMBRE_INDICE, texto, 'application/json');
+}
+
+/* Para la docente: ejecutá esta función una vez desde el editor (botón ▶)
+   después de publicar esta versión. Arma el índice con las maquetas que ya
+   están guardadas. También sirve si alguna vez el índice queda raro. */
+function reconstruirIndice() {
+  const carpeta = DriveApp.getFolderById(CARPETA_ID);
+  const archivos = carpeta.getFilesByName(NOMBRE_INDICE);
+  while (archivos.hasNext()) archivos.next().setTrashed(true);
+  const total = listarMaquetas().length;
+  Logger.log(total + ' maquetas en el índice');
+  return total;
 }
 
 /* Devuelve una maqueta completa. Solo lee archivos de la carpeta de maquetas. */
