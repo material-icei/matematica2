@@ -213,7 +213,7 @@ function pintarProgreso(){
   }
 }
 function nuevaRonda(){
-  errores=0; for(const k in zonas) delete zonas[k]; zonaActiva=null;
+  errores=0; esquemas={}; for(const k in zonas) delete zonas[k]; zonaActiva=null;
   pintarProgreso();
   $('#banco').classList.add('oculto');
   if(act===1) ronda1(); else if(act===2) ronda2(); else ronda3();
@@ -307,6 +307,7 @@ function ronda1(){
       <div class="paso" style="margin-top:auto">
         <div class="pregunta"><span class="num-paso">1</span> ¿Cuánto cuestan las dos cosas juntas?
           <span class="campo">$<input id="inTotal" inputmode="numeric" maxlength="4" autocomplete="off"></span></div>
+        <div class="lugar-esq" id="lugarEsq1"></div>
         <div class="pregunta"><span class="num-paso">2</span> Arrastrá a la caja la plata justa para pagar.</div>
       </div>
       <div class="mensaje" id="msg"></div>
@@ -321,6 +322,7 @@ function ronda1(){
   $('#lugarZona').appendChild(crearZona('caja','Arrastrá acá los billetes y monedas','💵'));
   botonVerSuma('caja').forEach(x=>$('#accZona').appendChild(x));
   mostrarBanco();
+  $('#lugarEsq1').appendChild(botonEsquema('suma','+',a.precio,b.precio,'Hacer el cálculo reflexivo'));
   const inp = $('#inTotal');
   inp.addEventListener('input', ()=>{ inp.classList.remove('mal','bien'); limpiarMensaje(); });
   $('#btnVerificar').onclick = () => {
@@ -365,6 +367,7 @@ function ronda2(){
       <div class="persona"><div class="cara">${persona.e}</div>
         <div><div class="nombre">${verbo.charAt(0).toUpperCase()+verbo.slice(1)}</div><div class="texto-tiene">tiene <b>$${tiene}</b> 👛</div></div></div>
       <div class="productos">${prods.map(htmlProducto).join('<div class="mas">+</div>')}</div>
+      <div class="lugar-esq" id="lugarEsqSuma"></div>
       <div class="paso" id="paso1">
         <div class="pregunta"><span class="num-paso">1</span> ¿Le alcanza la plata?
           <button class="btn btn-si" id="btnSi">Sí</button><button class="btn btn-no" id="btnNo">No</button></div>
@@ -374,6 +377,7 @@ function ronda2(){
     <div class="panel der paso bloqueado" id="paso2">
       <div class="pregunta"><span class="num-paso">2</span> <span id="preg2">¿Cuánto le sobra?</span>
         <span class="campo">$<input id="inDif" inputmode="numeric" maxlength="4" autocomplete="off"></span></div>
+      <div class="lugar-esq" id="lugarEsqResta"></div>
       <div class="pregunta" style="font-size:17px" id="preg2b">Arrastrá el vuelto a la bandeja.</div>
       <div id="lugarZona" style="flex:1;display:flex;min-height:0"></div>
       <div class="acciones-zona" id="accZona"></div>
@@ -382,6 +386,7 @@ function ronda2(){
   elMensaje = $('#msg');
   $('#lugarZona').appendChild(crearZona('bandeja','Arrastrá acá la plata','🪙'));
   botonVerSuma('bandeja').forEach(x=>$('#accZona').appendChild(x));
+  if(dos) $('#lugarEsqSuma').appendChild(botonEsquema('suma','+',prods[0].precio,prods[1].precio,'Sumar los precios (cálculo reflexivo)'));
   const responder = (dijoSi) => {
     if(dijoSi!==alcanza){
       fallo(alcanza ? `Mirá bien: tiene $${tiene} y la compra cuesta menos. ¡Sí le alcanza!` : `Mirá bien: la compra cuesta más de $${tiene}. ¡No le alcanza!`);
@@ -393,6 +398,9 @@ function ronda2(){
     $('#paso2').classList.remove('bloqueado');
     $('#preg2').textContent = alcanza ? '¿Cuánto le sobra?' : '¿Cuánto le falta?';
     $('#preg2b').textContent = alcanza ? 'Arrastrá a la bandeja la plata que le sobra (el vuelto).' : 'Arrastrá a la bandeja la plata que le falta.';
+    $('#lugarEsqResta').appendChild(alcanza
+      ? botonEsquema('resta','-',tiene,total,`Restar $${tiene} − $${total} (cálculo reflexivo)`)
+      : botonEsquema('resta','-',total,tiene,`Restar $${total} − $${tiene} (cálculo reflexivo)`));
     mostrarBanco();
     $('#inDif').focus();
   };
@@ -445,6 +453,7 @@ function ronda3(){
         <div class="raya"></div>
         <div class="lin"><span style="font-family:Fredoka;font-size:16px">TOTAL</span><span>$ ?</span></div>
       </div>
+      <div class="lugar-esq" id="lugarEsqSuma" style="justify-content:center"></div>
     </div>
     <div class="panel der">
       <div class="frases">
@@ -452,10 +461,13 @@ function ronda3(){
         <div class="frase"><span>Total de dinero que necesita para pagar la compra:</span> <span class="campo">$<input id="in2" inputmode="numeric" maxlength="4" autocomplete="off"></span></div>
         <div class="frase"><span>Total de dinero que le sobra:</span> <span class="campo">$<input id="in3" inputmode="numeric" maxlength="4" autocomplete="off"></span></div>
       </div>
+      <div class="lugar-esq" id="lugarEsqResta"></div>
       <div class="mensaje" id="msg" style="margin-top:auto"></div>
       <button class="btn btn-verde" id="btnVerificar">✔ Verificar</button>
     </div>`;
   elMensaje = $('#msg');
+  $('#lugarEsqSuma').appendChild(botonEsquema('suma','+',p1,p2,'Sumar el ticket (cálculo reflexivo)'));
+  $('#lugarEsqResta').appendChild(botonEsquema('resta','-',W,T,'¿Cuánto sobra? (cálculo reflexivo)', true));
   const bw = $('#billetera');
   // ordenar de mayor a menor como en la hoja, pero con monedas al final
   bill.items.sort((a,b)=> (D[a].tipo===D[b].tipo ? D[b].v-D[a].v : (D[a].tipo==='billete'?-1:1)))
@@ -478,5 +490,186 @@ function ronda3(){
     fallo(pistas.join(' '));
   };
 }
+
+/* ================= CÁLCULO REFLEXIVO (esquema en árbol, como la hoja) =================
+   Espacio virtual de 960 de ancho. Flechas: verde = cienes, azul = dieces, rojo = unos.
+   Si la cuenta necesita canje, se agregan niveles extra (como el ejercicio b del PDF). */
+let esquemas = {};
+const partes = n => [Math.floor(n/100)*100, Math.floor(n%100/10)*10, n%10];
+const ANCHO_E = 960, PASO_Y = 108, BOX_W = 86, BOX_H = 50;
+
+function nuevoLayout(){
+  const L = {nodos:[], lineas:[], ops:[], etiquetas:[], maxY:0};
+  L.box = (x, y, v, color, tipo='input') => {
+    const n = {x, y, v, color, tipo, w: tipo==='total'?112:(tipo==='fija'||color==='n'?104:BOX_W), h: tipo==='total'?58:BOX_H};
+    L.nodos.push(n); L.maxY = Math.max(L.maxY, y); return n;
+  };
+  L.linea = (de, a, color, viaY=null) => L.lineas.push({de, a, color, viaY});
+  L.op = (s, x, y) => L.ops.push({s, x, y});
+  L.etiqueta = (txt, y) => L.etiquetas.push({txt, y});
+  return L;
+}
+
+function layoutSuma(A, B, abierto){
+  const L = nuevoLayout(); const t = abierto ? 'input' : 'fija';
+  const [cA,dA,uA] = partes(A), [cB,dB,uB] = partes(B);
+  let y = 40;
+  const a = L.box(270, y, A, 'n', t), b = L.box(630, y, B, 'n', t); L.op('+', 450, y);
+  y += PASO_Y;
+  const r1 = [L.box(160,y,cA,'c'), L.box(270,y,dA,'d'), L.box(380,y,uA,'u'), L.box(520,y,cB,'c'), L.box(630,y,dB,'d'), L.box(740,y,uB,'u')];
+  [215,325,575,685].forEach(x => L.op('+', x, y));
+  ['c','d','u'].forEach((c,i) => { L.linea(a, r1[i], c); L.linea(b, r1[i+3], c); });
+  y += PASO_Y;
+  const r2 = [L.box(125,y,cA,'c'), L.box(235,y,cB,'c'), L.box(395,y,dA,'d'), L.box(505,y,dB,'d'), L.box(665,y,uA,'u'), L.box(775,y,uB,'u')];
+  [180,450,720].forEach(x => L.op('+', x, y));
+  L.linea(r1[0],r2[0],'c'); L.linea(r1[3],r2[1],'c'); L.linea(r1[1],r2[2],'d'); L.linea(r1[4],r2[3],'d'); L.linea(r1[2],r2[4],'u'); L.linea(r1[5],r2[5],'u');
+  y += PASO_Y;
+  let C = cA+cB, D = dA+dB, U = uA+uB;
+  let nc = L.box(180,y,C,'c'), nd = L.box(450,y,D,'d'), nu = L.box(720,y,U,'u');
+  L.op('+',315,y); L.op('+',585,y);
+  L.linea(r2[0],nc,'c'); L.linea(r2[1],nc,'c'); L.linea(r2[2],nd,'d'); L.linea(r2[3],nd,'d'); L.linea(r2[4],nu,'u'); L.linea(r2[5],nu,'u');
+  // Como mucho 6 niveles: si hay canje, un solo nivel separa lo que sobra
+  // (10 unos → 1 diez, 10 dieces → 1 cien) y el último nivel junta todo.
+  if(U >= 10 || D >= 100){
+    y += PASO_Y;
+    const txt = [];
+    const total = A + B, [cf, df, uf] = partes(total);
+    const s = {};
+    s.c = L.box(D>=100 ? 140 : 180, y, C, 'c'); 
+    if(D >= 100){ s.cien = L.box(270, y, 100, 'c'); s.d = L.box(400, y, D-100, 'd'); txt.push('10 dieces = 1 cien'); }
+    else s.d = L.box(450, y, D, 'd');
+    if(U >= 10){ s.diez = L.box(580, y, 10, 'd'); s.u = L.box(720, y, U-10, 'u'); txt.push('10 unos = 1 diez'); }
+    else s.u = L.box(720, y, U, 'u');
+    const fila = [s.c, s.cien, s.d, s.diez, s.u].filter(Boolean);
+    for(let i=0;i<fila.length-1;i++) L.op('+', (fila[i].x+fila[i+1].x)/2, y);
+    L.etiqueta('¡Canje! ' + txt.join(' y '), y);
+    L.linea(nc, s.c, 'c');
+    if(s.cien){ L.linea(nd, s.cien, 'c'); L.linea(nd, s.d, 'd'); } else L.linea(nd, s.d, 'd');
+    if(s.diez){ L.linea(nu, s.diez, 'd'); L.linea(nu, s.u, 'u'); } else L.linea(nu, s.u, 'u');
+    y += PASO_Y;
+    nc = L.box(180, y, cf, 'c'); nd = L.box(450, y, df, 'd'); nu = L.box(720, y, uf, 'u');
+    L.op('+',315,y); L.op('+',585,y);
+    // a dónde va cada parte: si los dieces llegan a 100, forman un cien
+    const dRest = s.cien ? D-100 : D;
+    const dieceVaACien = !s.cien && s.diez && dRest + 10 >= 100;
+    L.linea(s.c, nc, 'c');
+    if(s.cien) L.linea(s.cien, nc, 'c');
+    L.linea(s.d, dieceVaACien ? nc : nd, 'd');
+    if(s.diez) L.linea(s.diez, dieceVaACien ? nc : nd, 'd');
+    L.linea(s.u, nu, 'u');
+  }
+  L.op('=', 812, y); L.box(882, y, A+B, 'n', 'total');
+  return L;
+}
+
+function layoutResta(A, B, abierto){
+  const L = nuevoLayout(); const t = abierto ? 'input' : 'fija';
+  let [c,d,u] = partes(A); const [cB,dB,uB] = partes(B);
+  let y = 40;
+  const a = L.box(270, y, A, 'n', t), b = L.box(630, y, B, 'n', t); L.op('−', 450, y);
+  y += PASO_Y;
+  const r1 = [L.box(160,y,c,'c'), L.box(270,y,d,'d'), L.box(380,y,u,'u'), L.box(520,y,cB,'c'), L.box(630,y,dB,'d'), L.box(740,y,uB,'u')];
+  [215,325,575,685].forEach(x => L.op('+', x, y));
+  ['c','d','u'].forEach((col,i) => { L.linea(a, r1[i], col); L.linea(b, r1[i+3], col); });
+  let izq = r1.slice(0,3);
+  const canjeCien = () => {
+    y += PASO_Y; L.etiqueta('¡Canje! 1 de $100 = 10 de $10', y);
+    c -= 100; d += 100;
+    const n = [L.box(160,y,c,'c'), L.box(270,y,d,'d'), L.box(380,y,u,'u')];
+    L.op('+',215,y); L.op('+',325,y);
+    L.linea(izq[0],n[0],'c'); L.linea(izq[0],n[1],'c'); L.linea(izq[1],n[1],'d'); L.linea(izq[2],n[2],'u');
+    izq = n;
+  };
+  const canjeDiez = () => {
+    y += PASO_Y; L.etiqueta('¡Canje! 1 de $10 = 10 de $1', y);
+    d -= 10; u += 10;
+    const n = [L.box(160,y,c,'c'), L.box(270,y,d,'d'), L.box(380,y,u,'u')];
+    L.op('+',215,y); L.op('+',325,y);
+    L.linea(izq[0],n[0],'c'); L.linea(izq[1],n[1],'d'); L.linea(izq[1],n[2],'d'); L.linea(izq[2],n[2],'u');
+    izq = n;
+  };
+  if(u < uB){ if(d === 0) canjeCien(); canjeDiez(); }
+  if(d < dB) canjeCien();
+  y += PASO_Y;
+  const r2 = [L.box(125,y,c,'c'), L.box(235,y,cB,'c'), L.box(395,y,d,'d'), L.box(505,y,dB,'d'), L.box(665,y,u,'u'), L.box(775,y,uB,'u')];
+  [180,450,720].forEach(x => L.op('−', x, y));
+  // si hubo canje, las flechas del número que se resta bajan derecho y doblan al final (no cruzan los casilleros)
+  const conCanje = izq[0] !== r1[0];
+  const vY = conCanje ? y - 52 : null;
+  L.linea(izq[0],r2[0],'c'); L.linea(r1[3],r2[1],'c',vY); L.linea(izq[1],r2[2],'d'); L.linea(r1[4],r2[3],'d',vY); L.linea(izq[2],r2[4],'u'); L.linea(r1[5],r2[5],'u',vY);
+  y += PASO_Y;
+  const f = [L.box(180,y,c-cB,'c'), L.box(450,y,d-dB,'d'), L.box(720,y,u-uB,'u')];
+  L.op('+',315,y); L.op('+',585,y);
+  L.linea(r2[0],f[0],'c'); L.linea(r2[1],f[0],'c'); L.linea(r2[2],f[1],'d'); L.linea(r2[3],f[1],'d'); L.linea(r2[4],f[2],'u'); L.linea(r2[5],f[2],'u');
+  L.op('=', 812, y); L.box(882, y, A-B, 'n', 'total');
+  return L;
+}
+
+function botonEsquema(clave, signo, A, B, texto, abierto=false){
+  const b = document.createElement('button');
+  b.className = 'btn btn-esquema'; b.type = 'button';
+  b.innerHTML = '🧮 ' + (texto || 'Cálculo reflexivo');
+  b.onclick = () => abrirEsquema(clave, signo, A, B, abierto);
+  return b;
+}
+
+function svgLineas(L, H){
+  const COL = {c:'#2e9e44', d:'#2f5bd8', u:'#d93a3a'};
+  const marcas = Object.entries(COL).map(([k,v]) =>
+    `<marker id="fl-${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${v}"/></marker>`).join('');
+  const lineas = L.lineas.map(({de,a,color,viaY}) => {
+    const x1 = de.x, y1 = de.y + de.h/2, x2 = a.x, y2 = a.y - a.h/2 - 3;
+    const pts = viaY ? `${x1},${y1} ${x1},${viaY} ${x2},${y2}` : `${x1},${y1} ${x2},${y2}`;
+    return `<polyline points="${pts}" fill="none" stroke="${COL[color]}" stroke-width="2.6" stroke-linejoin="round" marker-end="url(#fl-${color})"/>`;
+  }).join('');
+  return `<svg class="esq-svg" viewBox="0 0 ${ANCHO_E} ${H}"><defs>${marcas}</defs>${lineas}</svg>`;
+}
+
+function abrirEsquema(clave, signo, A, B, abierto=false){
+  if(!esquemas[clave]) esquemas[clave] = {valores:{}, hecho:false};
+  const est = esquemas[clave];
+  const L = signo==='+' ? layoutSuma(A,B,abierto) : layoutResta(A,B,abierto);
+  const H = L.maxY + 45;
+  const px = (v, tot) => (v/tot*100) + '%';
+  let n = 0;
+  const cajas = L.nodos.map(nd => {
+    const pos = `left:${px(nd.x-nd.w/2,ANCHO_E)};top:${px(nd.y-nd.h/2,H)};width:${px(nd.w,ANCHO_E)};height:${px(nd.h,H)}`;
+    if(nd.tipo==='fija') return `<div class="esq-caja fija" style="${pos}">${nd.v}</div>`;
+    const id = n++; const prev = est.valores[id] ?? '';
+    return `<input class="esq-caja c-${nd.color} ${nd.tipo==='total'?'total':''}" style="${pos}" data-id="${id}" value="${prev}" ${nd.tipo==='total'?'placeholder="?"':''} inputmode="numeric" maxlength="4" autocomplete="off">`;
+  }).join('');
+  const ops = L.ops.map(o => `<div class="esq-op" style="left:${px(o.x-16,ANCHO_E)};top:${px(o.y-18,H)};width:${px(32,ANCHO_E)};height:${px(36,H)}">${o.s}</div>`).join('');
+  const etqs = L.etiquetas.map(e => `<div class="esq-etq" style="left:${px(800,ANCHO_E)};top:${px(e.y-16,H)};width:${px(155,ANCHO_E)}">${e.txt}</div>`).join('');
+  $('#capaEsquema').innerHTML = `
+    <div class="overlay"><div class="modal modal-esquema">
+      <button class="eq-cerrar" id="eqCerrar" title="Cerrar">✖</button>
+      <h2>🧮 Cálculo reflexivo: ${signo==='+'?'suma':'resta'}</h2>
+      <div class="eq-ref"><span class="c-c">cienes</span><span class="c-d">dieces</span><span class="c-u">unos</span>
+        ${abierto ? '<span class="eq-ayuda">Arriba escribí: lo que tiene − lo que gasta</span>' : ''}</div>
+      <div class="esq-marco">
+        <div class="esq-diagrama" style="aspect-ratio:${ANCHO_E}/${H};width:min(100%, calc((94vh - 210px) * ${(ANCHO_E/H).toFixed(4)}))">
+          ${svgLineas(L, H)}${ops}${etqs}${cajas}
+        </div>
+      </div>
+      <div class="eq-nota">✏️ Usá el esquema para pensar la cuenta. Después escribí el resultado en la respuesta.</div>
+      <div class="eq-botones">
+        <button class="btn btn-gris" id="eqBorrar">🧽 Borrar</button>
+        <button class="btn btn-verde" id="eqListo">✔ Listo</button>
+      </div>
+    </div></div>`;
+  // orden de tabulación: de arriba hacia abajo y de izquierda a derecha
+  const ins = [...document.querySelectorAll('#capaEsquema input.esq-caja')]
+    .sort((p,q) => parseFloat(p.style.top)-parseFloat(q.style.top) || parseFloat(p.style.left)-parseFloat(q.style.left));
+  ins.forEach((inp,i) => {
+    inp.addEventListener('input', () => { est.valores[inp.dataset.id] = inp.value; inp.classList.remove('bien','mal'); });
+    inp.addEventListener('keydown', e => { if(e.key==='Enter'){ e.preventDefault(); (ins[i+1] || $('#eqListo')).focus(); } });
+  });
+  const primero = ins.find(x => x.value===''); if(primero) setTimeout(()=>primero.focus(), 50);
+  $('#eqCerrar').onclick = cerrarEsquema;
+  $('#eqBorrar').onclick = () => { est.valores = {}; ins.forEach(x => { x.value=''; x.classList.remove('bien','mal'); }); ins[0] && ins[0].focus(); };
+  $('#eqListo').onclick = cerrarEsquema;
+}
+function cerrarEsquema(){ $('#capaEsquema').innerHTML=''; }
+document.addEventListener('keydown', e => { if(e.key==='Escape' && $('#capaEsquema').innerHTML) cerrarEsquema(); });
 
 pintarInicio();
