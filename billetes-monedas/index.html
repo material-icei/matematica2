@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Billetes y monedas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilos.css">
+
+</head>
+<body>
+
+<header>
+  <h1>💰 Billetes y monedas <span class="sub" id="subtitulo"></span></h1>
+  <div class="chip" id="chipEstrellas">⭐ <span id="totalEstrellas">0</span></div>
+  <button class="btn-ico" id="btnSonido" title="Sonido">🔊</button>
+  <button class="btn-ico oculto" id="btnInicio" title="Volver al inicio">🏠</button>
+</header>
+
+<!-- ===== INICIO ===== -->
+<section id="inicio">
+  <h2>¡Vamos de compras! 🛒</h2>
+  <p class="lead">Elegí una actividad. Cada respuesta correcta te da estrellas ⭐</p>
+  <div class="menu">
+    <button class="tarjeta t1" data-act="1">
+      <div class="emo">🧾</div><h3>¡A pagar!</h3>
+      <p>Sumá la compra y arrastrá los billetes y monedas a la caja.</p>
+      <div class="estrellas-act" id="ea1"></div>
+    </button>
+    <button class="tarjeta t2" data-act="2">
+      <div class="emo">🤔</div><h3>¿Le alcanza?</h3>
+      <p>Descubrí si alcanza la plata y cuánto sobra o falta.</p>
+      <div class="estrellas-act" id="ea2"></div>
+    </button>
+    <button class="tarjeta t3" data-act="3">
+      <div class="emo">✏️</div><h3>Contar y completar</h3>
+      <p>Contá la plata de cada chico y completá las oraciones.</p>
+      <div class="estrellas-act" id="ea3"></div>
+    </button>
+  </div>
+  <div class="album">
+    <h4>📒 Mis figuritas</h4>
+    <div class="figuritas" id="figuritas"></div>
+    <button class="link-borrar" id="btnBorrar">borrar progreso</button>
+  </div>
+</section>
+
+<!-- ===== JUEGO ===== -->
+<section id="juego" class="oculto">
+  <div class="barra-progreso" id="progreso"></div>
+  <div class="consigna" id="consigna"></div>
+  <div class="escena" id="escena"></div>
+  <div class="banco oculto" id="banco"></div>
+</section>
+
+<div id="capaModal"></div>
+
+<script src="juego.js"></script>
+</body>
+</html>
