@@ -355,11 +355,14 @@
      La carpeta de destino se define dentro de ese script, no acá. */
   const URL_GUARDADO = 'https://script.google.com/macros/s/AKfycbxeLDPkcGSE2eMRuCe2kkn5o4aH55gESdX6s45csc9I8DtPN1msA05xmNIpqwOt86gOfg/exec';
 
-  /*-------------------- Botón "Seguir construyendo" en Ver maquetas.-------------------
-     true  = se puede seguir editando una maqueta guardada.
-     false = las maquetas quedan terminadas: solo se pueden mirar.
-     ------------------------------------------------------------------------------- */
-  const PERMITIR_SEGUIR_CONSTRUYENDO = true;
+  /*-------------------- Botón "Seguir construyendo" en Ver maquetas.--------------
+  |--------------------------------------------------------------------------------|
+  |   true  = se puede seguir editando una maqueta guardada.                       |
+  |   false = las maquetas quedan terminadas: solo se pueden mirar.                |
+  |--------------------------------------------------------------------------------|
+  |------------------------------------------------------------------------------- */
+  const PERMITIR_SEGUIR_CONSTRUYENDO = false;
+   
 
   /* Grados que el alumno puede elegir al guardar */
   const GRADOS = ['2ºA', '2ºB'];
