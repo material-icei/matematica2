@@ -343,6 +343,28 @@ function ronda1(){
   };
 }
 
+/* ================= RESTAS SIN DIFICULTAD =================
+   En cada posición (cienes, dieces, unos) la cifra del primer número
+   es mayor o igual que la del segundo: no hace falta canjear. */
+const cifras = n => [Math.floor(n/100), Math.floor(n%100/10), n%10];
+function sinDificultad(A, B){ const a = cifras(A), b = cifras(B); return A > B && a.every((x,i) => x >= b[i]); }
+// todos los números B que se pueden restar a A sin dificultad, dentro de [min, max]
+function sustraendosPosibles(A, min, max){
+  const [c,d,u] = cifras(A), res = [];
+  for(let i=0;i<=c;i++) for(let j=0;j<=d;j++) for(let k=0;k<=u;k++){
+    const B = i*100+j*10+k; if(B>=min && B<=max && B<A) res.push(B);
+  }
+  return res;
+}
+// todos los números A a los que se les puede restar B sin dificultad, dentro de [min, max]
+function minuendosPosibles(B, min, max){
+  const [c,d,u] = cifras(B), res = [];
+  for(let i=c;i<=9;i++) for(let j=d;j<=9;j++) for(let k=u;k<=9;k++){
+    const A = i*100+j*10+k; if(A>=min && A<=max && A>B) res.push(A);
+  }
+  return res;
+}
+
 /* ================= ACTIVIDAD 2: ¿LE ALCANZA? ================= */
 function ronda2(){
   const persona = azar(PERSONAS);
@@ -352,10 +374,20 @@ function ronda2(){
   if(dos){ prods[0].precio = precioLindo(60,400); prods[1].precio = precioLindo(30, Math.min(420, 820-prods[0].precio)); }
   else prods[0].precio = precioLindo(90,780);
   const total = prods.reduce((s,p)=>s+p.precio,0);
-  const alcanza = Math.random()<.7;
-  let tiene;
-  if(alcanza){ tiene = Math.random()<.35 ? Math.min(999, Math.ceil((total+1)/100)*100) : Math.min(999, total + R(5, Math.max(6, Math.min(350, 999-total)))); if(tiene<=total) tiene=total+R(1,9); }
-  else { tiene = Math.max(10, total - R(8, Math.min(250, total-10))); }
+  let alcanza = Math.random()<.7;
+  let tiene, opciones;
+  if(alcanza){
+    // le sobra: tiene − total sin dificultad
+    opciones = minuendosPosibles(total, total+5, Math.min(999, total+350));
+    if(!opciones.length) opciones = minuendosPosibles(total, total+1, 999);
+    if(!opciones.length) alcanza = false;
+  }
+  if(!alcanza){
+    // le falta: total − tiene sin dificultad
+    opciones = sustraendosPosibles(total, Math.max(10, total-250), total-5);
+    if(!opciones.length) opciones = sustraendosPosibles(total, 1, total-1);
+  }
+  tiene = azar(opciones);
   const dif = Math.abs(tiene-total);
   datos = {total, tiene, alcanza, dif};
   const que = prods.map(p=>p.n).join(' y ');
@@ -434,9 +466,14 @@ function armarBilletera(){
 }
 function ronda3(){
   const persona = azar(PERSONAS.filter(p=>p.n!=='la abuela'));
-  const bill = armarBilletera();
-  const W = bill.total;
-  const T = R(Math.max(40, Math.floor(W*.45)), W-R(3,40));
+  // se busca una billetera y un gasto que se puedan restar sin dificultad
+  let bill, W, T, opciones = [];
+  for(let i=0; i<100 && !opciones.length; i++){
+    bill = armarBilletera(); W = bill.total;
+    opciones = sustraendosPosibles(W, Math.max(40, Math.floor(W*.4)), W-3);
+  }
+  if(!opciones.length){ bill = {items:['b200','b100','b50','b20','m5','m1','m1'], total:377}; W = 377; opciones = [254]; }
+  T = azar(opciones);
   const p1 = R(Math.max(10, Math.floor(T*.3)), Math.max(11, T-10));
   const p2 = T - p1;
   const sobra = W - T;
@@ -563,40 +600,19 @@ function layoutSuma(A, B, abierto){
 }
 
 function layoutResta(A, B, abierto){
+  // Resta sin dificultad: 4 niveles, igual que la suma sin canje.
   const L = nuevoLayout(); const t = abierto ? 'input' : 'fija';
-  let [c,d,u] = partes(A); const [cB,dB,uB] = partes(B);
+  const [c,d,u] = partes(A), [cB,dB,uB] = partes(B);
   let y = 40;
   const a = L.box(270, y, A, 'n', t), b = L.box(630, y, B, 'n', t); L.op('−', 450, y);
   y += PASO_Y;
   const r1 = [L.box(160,y,c,'c'), L.box(270,y,d,'d'), L.box(380,y,u,'u'), L.box(520,y,cB,'c'), L.box(630,y,dB,'d'), L.box(740,y,uB,'u')];
   [215,325,575,685].forEach(x => L.op('+', x, y));
   ['c','d','u'].forEach((col,i) => { L.linea(a, r1[i], col); L.linea(b, r1[i+3], col); });
-  let izq = r1.slice(0,3);
-  const canjeCien = () => {
-    y += PASO_Y; L.etiqueta('¡Canje! 1 de $100 = 10 de $10', y);
-    c -= 100; d += 100;
-    const n = [L.box(160,y,c,'c'), L.box(270,y,d,'d'), L.box(380,y,u,'u')];
-    L.op('+',215,y); L.op('+',325,y);
-    L.linea(izq[0],n[0],'c'); L.linea(izq[0],n[1],'c'); L.linea(izq[1],n[1],'d'); L.linea(izq[2],n[2],'u');
-    izq = n;
-  };
-  const canjeDiez = () => {
-    y += PASO_Y; L.etiqueta('¡Canje! 1 de $10 = 10 de $1', y);
-    d -= 10; u += 10;
-    const n = [L.box(160,y,c,'c'), L.box(270,y,d,'d'), L.box(380,y,u,'u')];
-    L.op('+',215,y); L.op('+',325,y);
-    L.linea(izq[0],n[0],'c'); L.linea(izq[1],n[1],'d'); L.linea(izq[1],n[2],'d'); L.linea(izq[2],n[2],'u');
-    izq = n;
-  };
-  if(u < uB){ if(d === 0) canjeCien(); canjeDiez(); }
-  if(d < dB) canjeCien();
   y += PASO_Y;
   const r2 = [L.box(125,y,c,'c'), L.box(235,y,cB,'c'), L.box(395,y,d,'d'), L.box(505,y,dB,'d'), L.box(665,y,u,'u'), L.box(775,y,uB,'u')];
   [180,450,720].forEach(x => L.op('−', x, y));
-  // si hubo canje, las flechas del número que se resta bajan derecho y doblan al final (no cruzan los casilleros)
-  const conCanje = izq[0] !== r1[0];
-  const vY = conCanje ? y - 52 : null;
-  L.linea(izq[0],r2[0],'c'); L.linea(r1[3],r2[1],'c',vY); L.linea(izq[1],r2[2],'d'); L.linea(r1[4],r2[3],'d',vY); L.linea(izq[2],r2[4],'u'); L.linea(r1[5],r2[5],'u',vY);
+  L.linea(r1[0],r2[0],'c'); L.linea(r1[3],r2[1],'c'); L.linea(r1[1],r2[2],'d'); L.linea(r1[4],r2[3],'d'); L.linea(r1[2],r2[4],'u'); L.linea(r1[5],r2[5],'u');
   y += PASO_Y;
   const f = [L.box(180,y,c-cB,'c'), L.box(450,y,d-dB,'d'), L.box(720,y,u-uB,'u')];
   L.op('+',315,y); L.op('+',585,y);
@@ -673,3 +689,4 @@ function cerrarEsquema(){ $('#capaEsquema').innerHTML=''; }
 document.addEventListener('keydown', e => { if(e.key==='Escape' && $('#capaEsquema').innerHTML) cerrarEsquema(); });
 
 pintarInicio();
+
