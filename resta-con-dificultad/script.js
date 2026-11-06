@@ -1,396 +1,412 @@
-/* =========================================================
-   Restas con dificultad - 2° grado
-   Esquema de resolución por descomposición (decenas / unidades)
-   ========================================================= */
+// ===================== DATOS: HISTORIAS =====================
+
+const HISTORIAS_SUMA = [
+  { emoji: "📚", texto: "Rafael tenía {a} figuritas y compró {b} más. ¿Cuántas figuritas tiene ahora?" },
+  { emoji: "📖", texto: "En la biblioteca había {a} libros de cuentos y llegaron {b} nuevos. ¿Cuántos libros hay en total?" },
+  { emoji: "🧢", texto: "Mateo juntó {a} tapitas y su hermano le regaló {b}. ¿Cuántas tapitas tiene Mateo?" },
+  { emoji: "🌼", texto: "En el jardín había {a} flores y plantaron {b} más. ¿Cuántas flores hay ahora?" },
+  { emoji: "✏️", texto: "Sofía tenía {a} lápices de colores y compró {b} más. ¿Cuántos lápices tiene?" },
+  { emoji: "🥫", texto: "En la campaña solidaria juntaron {a} alimentos el lunes y {b} el martes. ¿Cuántos alimentos juntaron en total?" },
+  { emoji: "🧸", texto: "La fábrica de juguetes armó {a} muñecos y después armó {b} más. ¿Cuántos muñecos armó en total?" },
+  { emoji: "✨", texto: "Valentina tenía {a} stickers y le regalaron {b} más. ¿Cuántos stickers tiene ahora?" },
+  { emoji: "🍬", texto: "Julián tenía {a} caramelos y compró {b} más. ¿Cuántos caramelos tiene en total?" },
+  { emoji: "🔢", texto: "Camila contó {a} cuentas azules y {b} cuentas rojas para hacer un collar. ¿Cuántas cuentas usó en total?" },
+  { emoji: "🚗", texto: "Tomás tiene {a} autitos de colección y le regalaron {b} más. ¿Cuántos autitos tiene ahora?" },
+  { emoji: "🃏", texto: "En el club había {a} cartas en una caja y agregaron {b} cartas más. ¿Cuántas cartas hay en total?" },
+  { emoji: "🌱", texto: "Abril plantó {a} semillas el sábado y {b} semillas el domingo. ¿Cuántas semillas plantó en total?" },
+  { emoji: "🔘", texto: "Nicolás juntó {a} botones en una caja y encontró {b} más en otra. ¿Cuántos botones tiene en total?" },
+  { emoji: "🪙", texto: "Renata ahorró {a} monedas en su alcancía y agregó {b} monedas más. ¿Cuántas monedas tiene ahora?" },
+  { emoji: "🪨", texto: "Benjamín juntó {a} piedritas de colores y encontró {b} piedritas más en el patio. ¿Cuántas piedritas tiene en total?" },
+  { emoji: "🐚", texto: "Zoe recolectó {a} conchitas en la playa por la mañana y {b} más por la tarde. ¿Cuántas conchitas recolectó en total?" },
+  { emoji: "🍂", texto: "Ian juntó {a} hojas secas para un trabajo de la escuela y su amigo le dio {b} más. ¿Cuántas hojas tiene en total?" },
+  { emoji: "📷", texto: "Mía tiene {a} fotos pegadas en su álbum y agregó {b} fotos nuevas. ¿Cuántas fotos tiene en el álbum ahora?" },
+  { emoji: "📮", texto: "Julieta coleccionaba {a} sellos postales y le regalaron {b} más. ¿Cuántos sellos tiene en su colección?" }
+];
+
+const HISTORIAS_RESTA = [
+  { emoji: "🍫", texto: "La fábrica tenía {a} chocolates y vendió {b}. ¿Cuántos chocolates le quedan?" },
+  { emoji: "🎈", texto: "En el cumpleaños había {a} globos y se explotaron {b}. ¿Cuántos globos quedan?" },
+  { emoji: "🧃", texto: "El kiosco tenía {a} jugos y vendió {b} durante el recreo. ¿Cuántos jugos le quedan?" },
+  { emoji: "🪁", texto: "La jugetería tenía {a} barriletes y vendió {b}. ¿Cuántos barriletes le quedan?" },
+  { emoji: "🐟", texto: "En la pecera había {a} peces y se regalaron {b} a otra familia. ¿Cuántos peces quedan en la pecera?" },
+  { emoji: "🍎", texto: "La verdulería tenía {a} manzanas y vendió {b} en la mañana. ¿Cuántas manzanas le quedan?" },
+  { emoji: "🚌", texto: "En la plaza había {a} personas y se fueron {b}. ¿Cuántas personas quedan en la plaza?" },
+  { emoji: "🧁", texto: "La pastelería horneó {a} magdalenas y vendió {b} en el día. ¿Cuántas magdalenas le quedan?" },
+  { emoji: "🪀", texto: "El bazar tenía {a} juguetes y vendió {b}. ¿Cuántos juguetes le quedan en el estante?" },
+  { emoji: "🎟️", texto: "Para la kermés imprimieron {a} entradas y ya se vendieron {b}. ¿Cuántas entradas quedan?" },
+  { emoji: "🧵", texto: "La mercería tenía {a} metros de hilo y usó {b} metros para los trabajos. ¿Cuántos metros de hilo le quedan?" },
+  { emoji: "🪆", texto: "El museo tenía {a} figuras en exhibición y guardó {b} en el depósito. ¿Cuántas figuras quedan exhibidas?" },
+  { emoji: "🍊", texto: "La frutería recibió {a} naranjas y vendió {b} durante la mañana. ¿Cuántas naranjas le quedan?" },
+  { emoji: "📦", texto: "En el depósito había {a} cajas y se despacharon {b}. ¿Cuántas cajas quedan en el depósito?" },
+  { emoji: "🎨", texto: "La librería tenía {a} cajas de témperas y vendió {b}. ¿Cuántas cajas de témperas le quedan?" },
+  { emoji: "🐝", texto: "En la colmena había {a} abejas y {b} se fueron a otra colmena. ¿Cuántas abejas quedan?" },
+  { emoji: "🪵", texto: "El carpintero tenía {a} tablas de madera y usó {b} para un mueble. ¿Cuántas tablas le quedan?" },
+  { emoji: "🧮", texto: "En la juguetería había {a} ábacos y se vendieron {b}. ¿Cuántos ábacos quedan en el local?" },
+  { emoji: "🍞", texto: "La panadería horneó {a} panes y vendió {b} por la mañana. ¿Cuántos panes le quedan?" },
+  { emoji: "🧦", texto: "El local de ropa tenía {a} pares de medias y vendió {b}. ¿Cuántos pares de medias le quedan?" }
+];
+
+// ===================== CONFIGURACIÓN DE MODOS =====================
+
+const MODOS = {
+  "suma-facil": {
+    operacion: "+",
+    dificultad: false,
+    titulo: "➕ Suma sin dificultad",
+    historias: HISTORIAS_SUMA,
+    generar: generarNumerosSuma
+  },
+  "suma-dificil": {
+    operacion: "+",
+    dificultad: true,
+    titulo: "➕🔥 Suma con dificultad",
+    historias: HISTORIAS_SUMA,
+    generar: generarNumerosSuma
+  },
+  "resta-facil": {
+    operacion: "-",
+    dificultad: false,
+    titulo: "➖ Resta sin dificultad",
+    historias: HISTORIAS_RESTA,
+    generar: generarNumerosResta
+  },
+  "resta-dificil": {
+    operacion: "-",
+    dificultad: true,
+    titulo: "➖🔥 Resta con dificultad",
+    historias: HISTORIAS_RESTA,
+    generar: generarNumerosResta
+  }
+};
 
 const TOTAL_EJERCICIOS = 20;
 
-/* ---------- Historias / personajes ---------- */
-const HISTORIAS = [
-  { nombre: "Juan",      emoji: "🍫", objeto: "chocolates",         accion: "se comió",                          genero: "m" },
-  { nombre: "Martina",   emoji: "🪆", objeto: "muñecas",             accion: "le regaló a su hermana",            genero: "f" },
-  { nombre: "Fede",      emoji: "🎴", objeto: "figuritas",           accion: "perdió en el recreo",                genero: "f" },
-  { nombre: "Sofía",     emoji: "🍬", objeto: "caramelos",           accion: "repartió entre sus amigas",         genero: "m" },
-  { nombre: "Lucas",     emoji: "🔵", objeto: "canicas",             accion: "perdió jugando",                     genero: "f" },
-  { nombre: "Valentina", emoji: "✏️", objeto: "lápices",             accion: "prestó a sus compañeros",            genero: "m" },
-  { nombre: "Tomás",     emoji: "🚗", objeto: "autitos",             accion: "le regaló a su primo",               genero: "m" },
-  { nombre: "Camila",    emoji: "🎈", objeto: "globos",              accion: "dejó que se le escaparan",           genero: "m" },
-  { nombre: "Mateo",     emoji: "🍪", objeto: "galletitas",          accion: "comió en la merienda",               genero: "f" },
-  { nombre: "Julieta",   emoji: "📓", objeto: "cuadernos",           accion: "donó a la biblioteca",               genero: "m" },
-  { nombre: "Bruno",     emoji: "🌸", objeto: "flores",              accion: "regaló a su mamá",                   genero: "f" },
-  { nombre: "Emma",      emoji: "🍎", objeto: "manzanas",            accion: "usó para hacer una torta",           genero: "f" },
-  { nombre: "Nico",      emoji: "🔘", objeto: "botones",             accion: "perdió de su colección",             genero: "m" },
-  { nombre: "Abril",     emoji: "🪙", objeto: "monedas",             accion: "gastó en el kiosco",                 genero: "f" },
-  { nombre: "Santino",   emoji: "📚", objeto: "libros",              accion: "prestó a la biblioteca",             genero: "m" },
-  { nombre: "Mía",       emoji: "⛵", objeto: "barquitos de papel",  accion: "vio hundirse en el río",             genero: "m" },
-  { nombre: "Benja",     emoji: "🐟", objeto: "peces",               accion: "devolvió al río",                    genero: "m" },
-  { nombre: "Renata",    emoji: "⭐", objeto: "estrellitas doradas", accion: "usó para decorar un cartel",        genero: "f" },
-  { nombre: "Ian",       emoji: "🪨", objeto: "piedritas",           accion: "guardó en su colección de rocas",   genero: "f" },
-  { nombre: "Zoe",       emoji: "🌟", objeto: "stickers",            accion: "pegó en su cuaderno",                genero: "m" }
-];
+// ===================== ESTADO =====================
 
-/* ---------- Estado del juego ---------- */
-let ejercicios = [];
-let indiceActual = 0;
-let estrellas = 0;
+var modoActual = null;
+var ejercicios = [];
+var indiceActual = 0;
+var estrellas = 0;
 
-const EJERCICIOS_GUIADOS = 4; // en estas primeras restas se corrige cada casillero
-function esModoGuiado(indice) {
-  return indice < EJERCICIOS_GUIADOS;
+// ===================== GENERACIÓN DE NÚMEROS =====================
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/* ---------- Generación de números con "dificultad" ----------
-   Se exige que el número de unidades del minuendo sea menor
-   que el de unidades del sustraendo, para forzar el préstamo. */
-function generarNumeros() {
-  let a, b, intentos = 0;
-  do {
-    a = Math.floor(Math.random() * 80) + 20;      // 20 a 99
-    b = Math.floor(Math.random() * (a - 10)) + 10; // 10 a a-1
-    intentos++;
-  } while ((a % 10) >= (b % 10) && intentos < 300);
-
-  if ((a % 10) < (b % 10)) return { a, b };
-
-  // Respaldo (muy poco probable que se use)
-  const unidadesA = a % 10;
-  const decenasA = Math.floor(a / 10);
-  const unidadesB = Math.min(9, unidadesA + 1 + Math.floor(Math.random() * (9 - unidadesA)));
-  let decenasB = Math.max(1, decenasA - 1 - Math.floor(Math.random() * decenasA));
-  if (decenasB >= decenasA) decenasB = Math.max(1, decenasA - 1);
-  b = decenasB * 10 + unidadesB;
-  return { a, b };
+function digitos(n) {
+  const C = Math.floor(n / 100) % 10;
+  const D = Math.floor(n / 10) % 10;
+  const U = n % 10;
+  return { C, D, U };
 }
 
-function generarEjercicios() {
-  const historiasBarajadas = [...HISTORIAS].sort(() => Math.random() - 0.5);
-  ejercicios = historiasBarajadas.slice(0, TOTAL_EJERCICIOS).map((historia) => {
-    const { a, b } = generarNumeros();
-    return { ...historia, a, b, resultado: a - b, esperados: calcularEsperados(a, b) };
-  });
+function generarNumerosSuma(dificultad) {
+  for (let intento = 0; intento < 400; intento++) {
+    const C1 = rand(1, 4);
+    const D1 = rand(0, 9);
+    const U1 = rand(0, 9);
+    const maxC2 = Math.max(1, 9 - C1);
+    const C2 = rand(1, Math.min(9, maxC2 + 3)); // algo de margen, se filtra abajo
+    const D2 = rand(0, 9);
+    const U2 = rand(0, 9);
+
+    const a = C1 * 100 + D1 * 10 + U1;
+    const b = C2 * 100 + D2 * 10 + U2;
+    const suma = a + b;
+    if (suma >= 1000 || suma < 100) continue;
+
+    const carryU = (U1 + U2) >= 10;
+    const carryD = (D1 + D2 + (carryU ? 1 : 0)) >= 10;
+
+    if (dificultad) {
+      if (carryU || carryD) return { a, b };
+    } else {
+      if (!carryU && !carryD) return { a, b };
+    }
+  }
+  // Respaldo por si el azar no encontró un caso válido
+  return dificultad ? { a: 156, b: 277 } : { a: 123, b: 241 };
 }
 
-/* Valores correctos de cada casillero del esquema de descomposición,
-   siguiendo el método de "pedir prestado" (ver PDF de referencia).
-   - decenaResta: resta directa de las decenas, todavía SIN prestar (evidencia que a-b en unidades no se puede)
-   - tensFinal: paso siguiente, se le resta la decena que se prestó a las unidades
-   - uA2/uB2: se repiten las unidades para mostrar que la resta no se puede resolver directamente
-   - unidadesSuma: unidades de A + la decena prestada (convertida en 10 unidades)
-   - uB3: se repite nuevamente la unidad de B para restarla de unidadesSuma
-   - tensResultado/unidadesResultado: valores finales de decenas y unidades, listos para sumarse */
-function calcularEsperados(a, b) {
-  const tensA = Math.floor(a / 10) * 10;
-  const unitsA = a % 10;
-  const tensB = Math.floor(b / 10) * 10;
-  const unitsB = b % 10;
+function generarNumerosResta(dificultad) {
+  for (let intento = 0; intento < 400; intento++) {
+    const C1 = rand(2, 9);
+    const D1 = rand(1, 9);
+    const U1 = rand(0, 8);
 
-  const decenaResta = tensA - tensB;
-  const tensFinal = decenaResta - 10;
-  const tensResultado = tensFinal;
-  const unidadesSuma = unitsA + 10;
-  const unidadesResultado = unidadesSuma - unitsB;
+    let C2, D2, U2;
 
-  return {
-    tA: tensA, tB: tensB, uA: unitsA, uB: unitsB,
-    decenaResta,
-    uA2: unitsA, uB2: unitsB,
-    tensFinal, unidadesSuma, uB3: unitsB,
-    tensResultado, unidadesResultado
-  };
+    if (dificultad) {
+      // Se fuerza un "préstamo" en las unidades
+      C2 = rand(1, C1);
+      U2 = rand(U1 + 1, 9);
+      D2 = rand(0, D1 - 1);
+    } else {
+      // Sin préstamos: cada cifra de b es menor o igual que la de a
+      C2 = rand(1, C1);
+      D2 = rand(0, D1);
+      U2 = rand(0, U1);
+    }
+
+    const a = C1 * 100 + D1 * 10 + U1;
+    const b = C2 * 100 + D2 * 10 + U2;
+    if (b >= 100 && a > b && a < 1000) {
+      return { a, b };
+    }
+  }
+  return dificultad ? { a: 742, b: 328 } : { a: 487, b: 253 };
 }
 
-/* =========================================================
-   Construcción visual del esquema (una sola vez)
-   Espacio virtual de referencia: 900 x 550
-   ========================================================= */
-const ANCHO_V = 760;
-const ALTO_V = 480;
+// ===================== CÁLCULO DEL RESULTADO =====================
 
-function pctX(x) { return (x / ANCHO_V * 100) + "%"; }
-function pctY(y) { return (y / ALTO_V * 100) + "%"; }
+function calcularResultado(a, b, operacion) {
+  const total = operacion === "+" ? a + b : a - b;
+  return digitos(total);
+}
 
-// Definición de casilleros: {id, x, y, w, h, tipo}
-const CASILLEROS = [
-  { id: "boxA", x: 200, y: 60,  w: 110, h: 58, tipo: "fija" },
-  { id: "boxB", x: 560, y: 60,  w: 110, h: 58, tipo: "fija" },
+// ===================== CONSTRUCCIÓN DE EJERCICIOS =====================
 
-  { id: "tA", x: 95,  y: 150, w: 86, h: 54, tipo: "input" },
-  { id: "tB", x: 290, y: 150, w: 86, h: 54, tipo: "input" },
-  { id: "uA", x: 450, y: 150, w: 86, h: 54, tipo: "input" },
-  { id: "uB", x: 645, y: 150, w: 86, h: 54, tipo: "input" },
+function construirEjercicios(modoKey) {
+  const modo = MODOS[modoKey];
+  const historiasElegidas = [...modo.historias].sort(() => Math.random() - 0.5).slice(0, TOTAL_EJERCICIOS);
+  const lista = [];
+  for (let i = 0; i < TOTAL_EJERCICIOS; i++) {
+    const { a, b } = modo.generar(modo.dificultad);
+    const historia = historiasElegidas[i % historiasElegidas.length];
+    lista.push({
+      a, b,
+      operacion: modo.operacion,
+      emoji: historia.emoji,
+      texto: historia.texto.replace("{a}", a).replace("{b}", b),
+      esperado: calcularResultado(a, b, modo.operacion)
+    });
+  }
+  return lista;
+}
 
-  { id: "decenaResta", x: 195, y: 240, w: 86, h: 54, tipo: "input" },
-  { id: "uA2", x: 450, y: 240, w: 86, h: 54, tipo: "input" },
-  { id: "uB2", x: 645, y: 240, w: 86, h: 54, tipo: "input" },
+// ===================== NAVEGACIÓN DE PANTALLAS =====================
 
-  { id: "tensFinal", x: 195, y: 330, w: 86, h: 54, tipo: "input" },
-  { id: "unidadesSuma", x: 450, y: 330, w: 86, h: 54, tipo: "input" },
-  { id: "uB3", x: 645, y: 330, w: 86, h: 54, tipo: "input" },
+function irAMenu() {
+  document.getElementById("pantalla-menu").classList.remove("oculto");
+  document.getElementById("pantalla-juego").classList.add("oculto");
+  document.getElementById("pantalla-final").classList.add("oculto");
+}
 
-  { id: "tensResultado", x: 195, y: 420, w: 86, h: 54, tipo: "input" },
-  { id: "unidadesResultado", x: 547, y: 420, w: 86, h: 54, tipo: "input" },
-  { id: "respuestaFinalCaja", x: 690, y: 420, w: 118, h: 62, tipo: "destacada" }
-];
+function iniciarModo(modoKey) {
+  modoActual = modoKey;
+  ejercicios = construirEjercicios(modoKey);
+  indiceActual = 0;
+  estrellas = 0;
 
-const OPERADORES = [
-  { simbolo: "-", x: 380, y: 60 },
-  { simbolo: "-", x: 193, y: 150 },
-  { simbolo: "-", x: 547, y: 150 },
-  { simbolo: "-", x: 547, y: 240 },
-  { simbolo: "+", x: 322, y: 330 },
-  { simbolo: "-", x: 547, y: 330 },
-  { simbolo: "+", x: 371, y: 420 },
-  { simbolo: "=", x: 619, y: 420 }
-];
+  document.getElementById("titulo-modo").textContent = MODOS[modoKey].titulo;
+  document.getElementById("operador-signo").textContent = MODOS[modoKey].operacion;
 
-// Líneas: [x1, y1, x2, y2, color]
-// Rojo = tramo de decenas, Azul = tramo de unidades, Negro = la decena que se transfiere prestada hacia las unidades
-const LINEAS = [
-  [200, 89, 95, 123, "roja"],
-  [200, 89, 450, 123, "azul"],
-  [560, 89, 290, 123, "roja"],
-  [560, 89, 645, 123, "azul"],
+  const filaLlevadas = document.getElementById("fila-llevadas");
+  const celdaLlevadaC = document.getElementById("celda-llevada-c");
+  const celdaLlevadaD = document.getElementById("celda-llevada-d");
+  const celdaLlevadaU = document.getElementById("celda-llevada-u");
+  const aD = document.getElementById("a-d");
 
-  [95, 177, 195, 211, "roja"],
-  [290, 177, 195, 211, "roja"],
-  [450, 177, 450, 213, "azul"],
-  [645, 177, 645, 213, "azul"],
+  const esRestaDificil = MODOS[modoKey].dificultad && MODOS[modoKey].operacion === "-";
 
-  [195, 269, 195, 303, "roja"],
-  [195, 269, 450, 303, "negra"],
-  [450, 267, 450, 303, "azul"],
-  [645, 267, 645, 303, "azul"],
-
-  [195, 357, 195, 393, "roja"],
-  [450, 357, 547, 393, "azul"],
-  [645, 357, 547, 393, "azul"]
-];
-
-function ajustarTamañoDiagrama() {
-  const wrapper = document.querySelector(".diagrama-wrapper");
-  const diagrama = document.getElementById("diagrama");
-  if (!wrapper || !diagrama) return;
-
-  const maxAncho = wrapper.clientWidth;
-  const maxAlto = wrapper.clientHeight;
-  if (maxAncho <= 0 || maxAlto <= 0) return;
-
-  const proporcion = ANCHO_V / ALTO_V;
-  let ancho = maxAncho;
-  let alto = ancho / proporcion;
-
-  if (alto > maxAlto) {
-    alto = maxAlto;
-    ancho = alto * proporcion;
+  if (MODOS[modoKey].dificultad) {
+    filaLlevadas.classList.remove("oculto");
+    if (esRestaDificil) {
+      // Resta con dificultad: sólo el cuadradito del "1 prestado" arriba de las unidades
+      celdaLlevadaC.classList.add("oculto-celda");
+      celdaLlevadaD.classList.add("oculto-celda");
+      celdaLlevadaU.classList.remove("oculto-celda");
+    } else {
+      // Suma con dificultad: cuadraditos de "me llevo" arriba de decenas y centenas
+      celdaLlevadaC.classList.remove("oculto-celda");
+      celdaLlevadaD.classList.remove("oculto-celda");
+      celdaLlevadaU.classList.add("oculto-celda");
+    }
+  } else {
+    filaLlevadas.classList.add("oculto");
   }
 
-  diagrama.style.width = ancho + "px";
-  diagrama.style.height = alto + "px";
-  diagrama.style.setProperty("--escala", (ancho / ANCHO_V).toFixed(4));
+  // Permitir tachar la cifra de las decenas que "presta" sólo en resta con dificultad
+  aD.classList.toggle("tachable", esRestaDificil);
+
+  document.getElementById("pantalla-menu").classList.add("oculto");
+  document.getElementById("pantalla-final").classList.add("oculto");
+  document.getElementById("pantalla-juego").classList.remove("oculto");
+
+  cargarEjercicio(indiceActual);
 }
 
-function construirDiagrama() {
-  const contenedor = document.getElementById("diagrama");
-  contenedor.innerHTML = "";
+// ===================== CARGA Y VALIDACIÓN DE EJERCICIOS =====================
 
-  // Líneas primero (quedan detrás de los casilleros)
-  LINEAS.forEach(([x1, y1, x2, y2, color]) => {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const largo = Math.hypot(dx, dy);
-    const angulo = Math.atan2(dy, dx) * (180 / Math.PI);
-
-    const linea = document.createElement("div");
-    linea.className = "linea " + color;
-    linea.style.left = pctX(x1);
-    linea.style.top = pctY(y1);
-    linea.style.width = (largo / ANCHO_V * 100) + "%";
-    linea.style.transform = `rotate(${angulo}deg)`;
-    contenedor.appendChild(linea);
-  });
-
-  // Operadores
-  OPERADORES.forEach((op) => {
-    const el = document.createElement("div");
-    el.className = "operador";
-    el.textContent = op.simbolo;
-    el.style.left = pctX(op.x - 14);
-    el.style.top = pctY(op.y - 16);
-    el.style.width = pctX(28);
-    el.style.height = pctY(32);
-    contenedor.appendChild(el);
-  });
-
-  // Casilleros
-  CASILLEROS.forEach((c) => {
-    const el = document.createElement("div");
-    el.className = "caja " + (c.tipo === "fija" ? "fija" : c.tipo === "destacada" ? "destacada" : "");
-    el.id = "caja-" + c.id;
-    el.style.left = pctX(c.x - c.w / 2);
-    el.style.top = pctY(c.y - c.h / 2);
-    el.style.width = pctX(c.w);
-    el.style.height = pctY(c.h);
-
-    if (c.tipo === "fija") {
-      el.textContent = "";
-      el.dataset.fija = "true";
-    } else {
-      const input = document.createElement("input");
-      input.type = "text";
-      input.inputMode = "numeric";
-      input.id = "input-" + c.id;
-      if (c.tipo === "destacada") {
-        input.placeholder = "?";
-      } else {
-        // Casillero de descomposición: en las primeras restas se corrige
-        // apenas el alumno termina de completarlo.
-        input.addEventListener("blur", () => {
-          if (!esModoGuiado(indiceActual)) return;
-          if (input.value.trim() === "") return;
-
-          const esperado = ejercicios[indiceActual].esperados[c.id];
-          const ingresado = parseInt(input.value, 10);
-
-          if (ingresado === esperado) {
-            el.classList.remove("error");
-            el.classList.add("correcto");
-            input.readOnly = true;
-          } else {
-            el.classList.add("error");
-            setTimeout(() => {
-              el.classList.remove("error");
-              input.value = "";
-              input.focus();
-            }, 450);
-          }
-        });
-      }
-      el.appendChild(input);
-    }
-    contenedor.appendChild(el);
-  });
-}
-
-/* =========================================================
-   Carga y control de ejercicios
-   ========================================================= */
 function cargarEjercicio(indice) {
   const ej = ejercicios[indice];
 
   document.getElementById("emoji-personaje").textContent = ej.emoji;
-  const pronombre = ej.genero === "f" ? "Cuántas" : "Cuántos";
-  document.getElementById("texto-problema").textContent =
-    `${ej.nombre} tenía ${ej.a} ${ej.objeto} y ${ej.accion} ${ej.b}. ¿${pronombre} ${ej.objeto} le quedaron?`;
+  document.getElementById("texto-problema").textContent = ej.texto;
 
-  document.getElementById("caja-boxA").textContent = ej.a;
-  document.getElementById("caja-boxB").textContent = ej.b;
+  const da = digitos(ej.a);
+  const db = digitos(ej.b);
 
-  // Limpiar todos los casilleros del esquema (valor, bloqueo y estilos)
-  document.querySelectorAll(".caja input").forEach((inp) => {
+  document.getElementById("a-c").textContent = da.C;
+  document.getElementById("a-d").textContent = da.D;
+  document.getElementById("a-u").textContent = da.U;
+
+  document.getElementById("b-c").textContent = db.C;
+  document.getElementById("b-d").textContent = db.D;
+  document.getElementById("b-u").textContent = db.U;
+
+  const inputU = document.getElementById("input-u");
+  const inputD = document.getElementById("input-d");
+  const inputC = document.getElementById("input-c");
+
+  [inputU, inputD, inputC].forEach(inp => {
     inp.value = "";
+    inp.classList.remove("correcto", "error");
     inp.readOnly = false;
   });
-  document.querySelectorAll(".caja").forEach((c) => {
-    c.classList.remove("correcto", "error");
-  });
+
+  inputU.disabled = false;
+  inputD.disabled = false;
+  inputC.disabled = false;
+
+  const llevadaC = document.getElementById("llevada-c");
+  const llevadaD = document.getElementById("llevada-d");
+  const llevadaU = document.getElementById("llevada-u");
+  if (llevadaC) llevadaC.value = "";
+  if (llevadaD) llevadaD.value = "";
+  if (llevadaU) llevadaU.value = "";
+
+  const aD = document.getElementById("a-d");
+  aD.classList.remove("tachado");
+
   document.getElementById("feedback").textContent = "";
   document.getElementById("feedback").className = "feedback";
 
   document.getElementById("contador").textContent = `Ejercicio ${indice + 1} de ${TOTAL_EJERCICIOS}`;
-  document.getElementById("barra-relleno").style.width = (indice / TOTAL_EJERCICIOS * 100) + "%";
+  document.getElementById("estrellas").textContent = `⭐ ${estrellas}`;
+  document.getElementById("barra-relleno").style.width = `${(indice / TOTAL_EJERCICIOS) * 100}%`;
+
+  setTimeout(() => inputU.focus(), 50);
 }
 
-function verificarRespuesta() {
-  const ej = ejercicios[indiceActual];
-  const inputFinal = document.getElementById("input-respuestaFinalCaja");
-  const cajaFinal = document.getElementById("caja-respuestaFinalCaja");
-  const valor = parseInt(inputFinal.value, 10);
-  const feedback = document.getElementById("feedback");
+var verificando = false;
 
-  if (isNaN(valor)) {
-    feedback.textContent = "✍️ Completá el resultado final antes de verificar.";
-    feedback.className = "feedback incorrecto";
-    return;
-  }
+function configurarEntradaResultado() {
+  const orden = ["input-u", "input-d", "input-c"];
+  orden.forEach((id, i) => {
+    const input = document.getElementById(id);
+    input.addEventListener("input", () => {
+      if (verificando) return;
+      input.classList.remove("error", "correcto");
+      input.value = input.value.replace(/[^0-9]/g, "");
 
-  if (valor === ej.resultado) {
-    estrellas++;
-    document.getElementById("estrellas").textContent = "⭐ " + estrellas;
-    feedback.textContent = "🎉 ¡Muy bien! Resultado correcto.";
-    feedback.className = "feedback correcto";
-    cajaFinal.classList.remove("error");
-    lanzarConfeti(18);
-
-    setTimeout(() => {
-      if (indiceActual + 1 < TOTAL_EJERCICIOS) {
-        indiceActual++;
-        cargarEjercicio(indiceActual);
-      } else {
-        mostrarPantallaFinal();
+      // Al escribir una cifra, pasa al casillero de la izquierda (sin verificar)
+      if (input.value !== "" && i < orden.length - 1) {
+        document.getElementById(orden[i + 1]).focus();
       }
-    }, 1100);
+      verificarSiCompleto();
+    });
+    input.addEventListener("keydown", (ev) => {
+      // Borrar en un casillero vacío vuelve al de la derecha
+      if (ev.key === "Backspace" && input.value === "" && i > 0) {
+        document.getElementById(orden[i - 1]).focus();
+      }
+    });
+  });
+}
+
+function verificarSiCompleto() {
+  const inputs = ["input-c", "input-d", "input-u"].map(id => document.getElementById(id));
+  if (inputs.some(inp => inp.value === "")) return;
+
+  const ej = ejercicios[indiceActual];
+  const ingresado = inputs.map(inp => inp.value).join("");
+  const esperado = `${ej.esperado.C}${ej.esperado.D}${ej.esperado.U}`;
+  verificando = true;
+
+  if (ingresado === esperado) {
+    inputs.forEach(inp => { inp.classList.add("correcto"); inp.readOnly = true; });
+    setTimeout(() => { verificando = false; ejercicioCompletado(); }, 350);
   } else {
-    feedback.textContent = "🤔 Revisá tus cálculos, ¡vos podés!";
-    feedback.className = "feedback incorrecto";
-    cajaFinal.classList.add("error");
+    inputs.forEach(inp => inp.classList.add("error"));
+    document.getElementById("feedback").textContent = "Revisá la cuenta e intentá de nuevo 💪";
+    document.getElementById("feedback").className = "feedback incorrecto";
     setTimeout(() => {
-      cajaFinal.classList.remove("error");
-      inputFinal.value = "";
-      inputFinal.focus();
-    }, 450);
+      inputs.forEach(inp => { inp.classList.remove("error"); inp.value = ""; });
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("feedback").className = "feedback";
+      verificando = false;
+      document.getElementById("input-u").focus();
+    }, 700);
   }
 }
+
+function ejercicioCompletado() {
+  estrellas++;
+  document.getElementById("estrellas").textContent = `⭐ ${estrellas}`;
+  document.getElementById("feedback").textContent = "¡Muy bien! 🎉";
+  document.getElementById("feedback").className = "feedback correcto";
+  lanzarConfeti(16);
+
+  setTimeout(() => {
+    indiceActual++;
+    if (indiceActual < TOTAL_EJERCICIOS) {
+      cargarEjercicio(indiceActual);
+    } else {
+      mostrarPantallaFinal();
+    }
+  }, 1000);
+}
+
+// ===================== PANTALLA FINAL =====================
 
 function mostrarPantallaFinal() {
   document.getElementById("barra-relleno").style.width = "100%";
+  document.getElementById("resumen-modo").textContent =
+    `Resolviste las ${TOTAL_EJERCICIOS} cuentas de "${MODOS[modoActual].titulo.replace(/^[^\s]+\s/, "")}".`;
   document.getElementById("resumen-estrellas").textContent = `⭐ ${estrellas} de ${TOTAL_EJERCICIOS}`;
   document.getElementById("pantalla-final").classList.remove("oculto");
-  lanzarConfeti(60);
+  lanzarConfeti(40);
 }
 
-function reiniciarJuego() {
-  estrellas = 0;
-  indiceActual = 0;
-  document.getElementById("estrellas").textContent = "⭐ 0";
-  generarEjercicios();
-  cargarEjercicio(0);
-  document.getElementById("pantalla-final").classList.add("oculto");
-}
-
-/* ---------- Confeti ---------- */
-const EMOJIS_CONFETI = ["🎉", "⭐", "🎊", "✨", "🏅"];
+// ===================== CONFETI =====================
 
 function lanzarConfeti(cantidad) {
   const contenedor = document.getElementById("confetti-container");
+  const emojis = ["🎉", "⭐", "🎊", "✨", "🏆"];
   for (let i = 0; i < cantidad; i++) {
-    const pieza = document.createElement("span");
-    pieza.className = "confeti";
-    pieza.textContent = EMOJIS_CONFETI[Math.floor(Math.random() * EMOJIS_CONFETI.length)];
-    pieza.style.left = Math.random() * 100 + "vw";
-    const duracion = 2 + Math.random() * 1.5;
-    pieza.style.animationDuration = duracion + "s";
-    contenedor.appendChild(pieza);
-    setTimeout(() => pieza.remove(), duracion * 1000 + 100);
+    const span = document.createElement("span");
+    span.className = "confeti";
+    span.textContent = emojis[rand(0, emojis.length - 1)];
+    span.style.left = `${rand(0, 100)}%`;
+    span.style.fontSize = `${rand(14, 30)}px`;
+    span.style.animationDuration = `${rand(1400, 2600)}ms`;
+    contenedor.appendChild(span);
+    setTimeout(() => span.remove(), 2700);
   }
 }
 
-/* ---------- Inicialización ---------- */
+// ===================== INICIALIZACIÓN =====================
+
 document.addEventListener("DOMContentLoaded", () => {
-  construirDiagrama();
-  ajustarTamañoDiagrama();
-  generarEjercicios();
-  cargarEjercicio(0);
+  configurarEntradaResultado();
 
-  document.getElementById("btn-verificar").addEventListener("click", verificarRespuesta);
-  document.getElementById("btn-reiniciar").addEventListener("click", reiniciarJuego);
-
-  document.getElementById("input-respuestaFinalCaja")?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") verificarRespuesta();
+  document.getElementById("a-d").addEventListener("click", (ev) => {
+    if (ev.currentTarget.classList.contains("tachable")) {
+      ev.currentTarget.classList.toggle("tachado");
+    }
   });
 
-  let temporizadorResize = null;
-  window.addEventListener("resize", () => {
-    clearTimeout(temporizadorResize);
-    temporizadorResize = setTimeout(ajustarTamañoDiagrama, 120);
+  document.querySelectorAll(".tarjeta-modo").forEach(boton => {
+    boton.addEventListener("click", () => {
+      iniciarModo(boton.dataset.modo);
+    });
+  });
+
+  document.getElementById("btn-volver-menu").addEventListener("click", irAMenu);
+  document.getElementById("btn-ir-menu").addEventListener("click", irAMenu);
+  document.getElementById("btn-jugar-de-nuevo").addEventListener("click", () => {
+    iniciarModo(modoActual);
   });
 });
