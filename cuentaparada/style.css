@@ -1,0 +1,505 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Comic Neue', 'Trebuchet MS', sans-serif;
+  background: linear-gradient(160deg, #fef6e4 0%, #e8f6ff 50%, #fef0f6 100%);
+  color: #3a3a3a;
+  overflow: hidden; /* 16:9 sin scroll, pensado para Chromebook */
+}
+
+.app {
+  height: 100vh;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 10px 18px 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pantalla {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pantalla.oculto {
+  display: none;
+}
+
+/* ================= MENÚ ================= */
+.cabecera-menu {
+  flex: 0 0 auto;
+  text-align: center;
+  padding: 10px 0 4px;
+}
+
+.cabecera-menu h1 {
+  margin: 0 0 4px;
+  font-size: 2rem;
+  color: #4a3f8a;
+}
+
+.cabecera-menu .subtitulo {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #6a5a9a;
+}
+
+.tarjetas-modos {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 22px;
+  padding: 18px 10vw 26px;
+}
+
+.tarjeta-modo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.tarjeta-modo:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
+}
+
+.tarjeta-modo:active {
+  transform: translateY(0);
+}
+
+#modo-suma-facil, #modo-suma-dificil {
+  background: linear-gradient(160deg, #eafff1 0%, #ffffff 65%);
+}
+
+#modo-resta-facil, #modo-resta-dificil {
+  background: linear-gradient(160deg, #fff0f0 0%, #ffffff 65%);
+}
+
+.tarjeta-emoji {
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.tarjeta-titulo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #4a3f8a;
+}
+
+.tarjeta-nivel {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 3px 14px;
+  border-radius: 999px;
+}
+
+.nivel-facil {
+  background: #d6f6df;
+  color: #1c6b34;
+}
+
+.nivel-dificil {
+  background: #ffe1d6;
+  color: #a4411d;
+}
+
+/* ================= PANTALLA DE JUEGO ================= */
+.cabecera {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.btn-volver {
+  flex: 0 0 auto;
+  border: 2px solid #4a3f8a;
+  background: #ffffff;
+  color: #4a3f8a;
+  font-weight: 700;
+  font-family: inherit;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-volver:hover {
+  background: #eef1ff;
+}
+
+.cabecera h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #4a3f8a;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.progreso-caja {
+  flex: 1 1 auto;
+  max-width: 480px;
+  margin: 0 0 0 auto;
+}
+
+.progreso-info {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.85rem;
+  margin-bottom: 3px;
+  color: #4a3f8a;
+}
+
+.barra-progreso {
+  width: 100%;
+  height: 12px;
+  background: #ffffff;
+  border: 2px solid #4a3f8a;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barra-relleno {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #7bd88a, #4fc76b);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+/* ----- Contenido principal ----- */
+#juego {
+  flex: 1 1 auto;
+  min-height: 0;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 10px 18px;
+  margin-top: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.enunciado {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff7de;
+  border: 2px dashed #f4c96b;
+  border-radius: 14px;
+  padding: 7px 16px;
+}
+
+.emoji-personaje {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+#texto-problema {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #6a4a12;
+  line-height: 1.22;
+}
+
+/* ----- Casita (cuenta parada) ----- */
+.casita-seccion {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.casita-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.casita {
+  position: relative;
+  width: min(74vh, 520px);
+  background: #fdfaf2;
+  border: 3px solid #4a3f8a;
+  border-radius: 16px;
+  padding: 14px 18px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 0.55fr 1fr 1fr 1fr;
+  align-items: center;
+  text-align: center;
+}
+
+.celda {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  font-size: 1.95rem;
+  font-weight: 700;
+}
+
+.encabezado-cdu .celda {
+  height: 26px;
+  font-size: 1.2rem;
+  color: #8a7fc7;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.fila-llevadas {
+  min-height: 30px;
+}
+
+.fila-llevadas.oculto {
+  visibility: hidden;
+  height: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.llevada {
+  height: 28px;
+}
+
+.llevada.oculto-celda {
+  visibility: hidden;
+}
+
+.llevada input {
+  width: 32px;
+  height: 28px;
+  border: 1.5px dashed #c79a3b;
+  border-radius: 6px;
+  background: #fff8e4;
+  text-align: center;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #a4711d;
+}
+
+.digito {
+  color: #333;
+}
+
+.digito.tachable {
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.digito.tachable:hover {
+  background: #fff0f0;
+}
+
+.digito.tachado {
+  position: relative;
+  color: #c24a3a;
+}
+
+.digito.tachado::after {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 50%;
+  border-top: 3px solid #c24a3a;
+  transform: rotate(-12deg);
+}
+
+.operador {
+  color: #4a3f8a;
+  font-size: 2.1rem;
+}
+
+.linea-cuenta {
+  height: 4px;
+  background: #4a3f8a;
+  margin: 3px 0 6px;
+  border-radius: 2px;
+}
+
+.celda-resultado input {
+  width: 85%;
+  height: 44px;
+  border: 2px solid #4a3f8a;
+  border-radius: 8px;
+  background: #eef1ff;
+  text-align: center;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 1.7rem;
+  color: #333;
+}
+
+.celda-resultado input:disabled {
+  background: #f1f1f1;
+  border-color: #c9c9d6;
+  color: #aaa;
+}
+
+.celda-resultado input:focus {
+  outline: 2px solid #7bd88a;
+}
+
+.celda-resultado input.correcto {
+  background: #eaffef;
+  border-color: #4fc76b;
+  color: #1c6b34;
+}
+
+.celda-resultado input.error {
+  border-color: #e05252;
+  animation: sacudir 0.4s ease;
+}
+
+@keyframes sacudir {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.feedback {
+  flex: 0 0 auto;
+  min-height: 18px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+}
+
+.feedback.correcto { color: #2e9b4f; }
+.feedback.incorrecto { color: #d1483f; }
+
+/* ----- Pantalla final ----- */
+.pantalla-final {
+  position: fixed;
+  inset: 0;
+  background: rgba(40, 30, 70, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.pantalla-final.oculto {
+  display: none;
+}
+
+.contenido-final {
+  background: #fffdf6;
+  border-radius: 22px;
+  padding: 5vh 5vw;
+  text-align: center;
+  max-width: 90vw;
+  max-height: 90vh;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.trofeo {
+  font-size: 3.2rem;
+}
+
+.contenido-final h2 {
+  color: #4a3f8a;
+  margin: 4px 0 8px;
+  font-size: 1.6rem;
+}
+
+.contenido-final p {
+  font-size: 1rem;
+  margin: 4px 0;
+}
+
+.resumen-estrellas {
+  font-weight: 700;
+  color: #d69e2e;
+  font-size: 1.25rem !important;
+}
+
+.botones-final {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.botones-final button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+#btn-jugar-de-nuevo {
+  background: linear-gradient(90deg, #8a7bd8, #6a4fc7);
+  color: #fff;
+}
+
+#btn-ir-menu {
+  background: #eef1ff;
+  color: #4a3f8a;
+  border: 2px solid #4a3f8a;
+}
+
+/* ----- Confetti ----- */
+#confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 60;
+}
+
+.confeti {
+  position: absolute;
+  top: -40px;
+  font-size: 1.5rem;
+  animation: caer linear forwards;
+}
+
+@keyframes caer {
+  to {
+    transform: translateY(110vh) rotate(360deg);
+    opacity: 0.2;
+  }
+}
