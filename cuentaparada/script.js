@@ -267,8 +267,8 @@ function cargarEjercicio(indice) {
   });
 
   inputU.disabled = false;
-  inputD.disabled = true;
-  inputC.disabled = true;
+  inputD.disabled = false;
+  inputC.disabled = false;
 
   const llevadaC = document.getElementById("llevada-c");
   const llevadaD = document.getElementById("llevada-d");
@@ -290,35 +290,56 @@ function cargarEjercicio(indice) {
   setTimeout(() => inputU.focus(), 50);
 }
 
-function manejarEntradaColumna(idCelda, idEsperado, siguienteInput) {
-  const input = document.getElementById(idCelda);
-  input.addEventListener("input", () => {
-    input.classList.remove("error", "correcto");
-    const valor = input.value.trim();
-    if (valor === "") return;
+var verificando = false;
 
-    const ej = ejercicios[indiceActual];
-    const esperado = String(ej.esperado[idEsperado]);
+function configurarEntradaResultado() {
+  const orden = ["input-u", "input-d", "input-c"];
+  orden.forEach((id, i) => {
+    const input = document.getElementById(id);
+    input.addEventListener("input", () => {
+      if (verificando) return;
+      input.classList.remove("error", "correcto");
+      input.value = input.value.replace(/[^0-9]/g, "");
 
-    if (valor === esperado) {
-      input.classList.add("correcto");
-      input.readOnly = true;
-      if (siguienteInput) {
-        const sig = document.getElementById(siguienteInput);
-        sig.disabled = false;
-        setTimeout(() => sig.focus(), 30);
-      } else {
-        // Última columna (centenas): ejercicio completo
-        setTimeout(() => ejercicioCompletado(), 350);
+      // Al escribir una cifra, pasa al casillero de la izquierda (sin verificar)
+      if (input.value !== "" && i < orden.length - 1) {
+        document.getElementById(orden[i + 1]).focus();
       }
-    } else {
-      input.classList.add("error");
-      setTimeout(() => {
-        input.classList.remove("error");
-        input.value = "";
-      }, 450);
-    }
+      verificarSiCompleto();
+    });
+    input.addEventListener("keydown", (ev) => {
+      // Borrar en un casillero vacío vuelve al de la derecha
+      if (ev.key === "Backspace" && input.value === "" && i > 0) {
+        document.getElementById(orden[i - 1]).focus();
+      }
+    });
   });
+}
+
+function verificarSiCompleto() {
+  const inputs = ["input-c", "input-d", "input-u"].map(id => document.getElementById(id));
+  if (inputs.some(inp => inp.value === "")) return;
+
+  const ej = ejercicios[indiceActual];
+  const ingresado = inputs.map(inp => inp.value).join("");
+  const esperado = `${ej.esperado.C}${ej.esperado.D}${ej.esperado.U}`;
+  verificando = true;
+
+  if (ingresado === esperado) {
+    inputs.forEach(inp => { inp.classList.add("correcto"); inp.readOnly = true; });
+    setTimeout(() => { verificando = false; ejercicioCompletado(); }, 350);
+  } else {
+    inputs.forEach(inp => inp.classList.add("error"));
+    document.getElementById("feedback").textContent = "Revisá la cuenta e intentá de nuevo 💪";
+    document.getElementById("feedback").className = "feedback incorrecto";
+    setTimeout(() => {
+      inputs.forEach(inp => { inp.classList.remove("error"); inp.value = ""; });
+      document.getElementById("feedback").textContent = "";
+      document.getElementById("feedback").className = "feedback";
+      verificando = false;
+      document.getElementById("input-u").focus();
+    }, 700);
+  }
 }
 
 function ejercicioCompletado() {
@@ -369,9 +390,7 @@ function lanzarConfeti(cantidad) {
 // ===================== INICIALIZACIÓN =====================
 
 document.addEventListener("DOMContentLoaded", () => {
-  manejarEntradaColumna("input-u", "U", "input-d");
-  manejarEntradaColumna("input-d", "D", "input-c");
-  manejarEntradaColumna("input-c", "C", null);
+  configurarEntradaResultado();
 
   document.getElementById("a-d").addEventListener("click", (ev) => {
     if (ev.currentTarget.classList.contains("tachable")) {
@@ -391,3 +410,4 @@ document.addEventListener("DOMContentLoaded", () => {
     iniciarModo(modoActual);
   });
 });
+
