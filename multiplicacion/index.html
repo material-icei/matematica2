@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>¡Multiplicamos! · 2.º grado</title>
+  <!--
+    DEPENDENCIAS EXTERNAS (opcionales):
+    • Google Fonts «Baloo 2». Si no hay internet, se usa una fuente del sistema.
+    • Los dibujos son emojis del sistema y SVG dibujados en el propio código:
+      no se necesitan imágenes ni otros archivos.
+  -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="viewport">
+  <!-- Escenario de 1366 × 768 que se escala para entrar en cualquier pantalla -->
+  <div id="stage">
+
+    <!-- Fondo ilustrado con símbolos matemáticos (lo completa app.js) -->
+    <div class="bg-math" aria-hidden="true"></div>
+
+    <!-- ============ PORTADA ============ -->
+    <section id="scr-home" class="screen">
+      <div class="home">
+        <div class="home-chars">
+          <div id="home-owl" class="home-owl"></div>
+          <span class="buddy b1">2</span>
+          <span class="buddy b2">×</span>
+          <span class="buddy b3">5</span>
+        </div>
+        <div class="home-card">
+          <div class="home-kicker">Matemática · 2.º grado</div>
+          <h1 class="home-title"><span>¡Multi</span><span>plicamos!</span></h1>
+          <p class="home-sub">Aprendé a multiplicar jugando con <b>Lechu</b>, la lechuza matemática.</p>
+          <div id="home-stats" class="home-stats"></div>
+          <button id="btn-start" class="btn big">¡Empezar! ▶</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MAPA DE AVENTURAS ============ -->
+    <section id="scr-map" class="screen">
+      <div class="map-top">
+        <div class="map-title">🗺️ Mapa de aventuras</div>
+        <div class="spacer"></div>
+        <div class="chip" title="Estrellas">⭐ <span id="st-stars">0</span></div>
+        <div class="chip" title="Medallas">🏅 <span id="st-medals">0</span></div>
+        <div class="chip" title="Actividades completadas">✅ <span id="st-acts">0 de 12</span> actividades</div>
+        <button id="btn-home" class="icon-btn" title="Portada">🏠</button>
+        <button id="btn-reset" class="icon-btn" title="Reiniciar progreso">🔄</button>
+      </div>
+      <div class="progress">
+        <span>Mi progreso</span>
+        <div class="pbar"><i id="progress-fill"></i></div>
+        <span id="progress-label">0%</span>
+      </div>
+      <svg id="map-svg" viewBox="0 0 1366 768" aria-hidden="true">
+        <path id="map-path-bg" d=""/>
+        <path id="map-path" d=""/>
+      </svg>
+      <div id="stations"></div>
+      <div class="badges-panel">
+        <div class="bp-title">Mis insignias</div>
+        <div id="badges" class="badges"></div>
+      </div>
+      <div class="mascot-slot"></div>
+    </section>
+
+    <!-- ============ MÓDULO (3 niveles) ============ -->
+    <section id="scr-module" class="screen">
+      <div class="mod-top">
+        <button id="btn-mod-back" class="btn ghost small">◀ Mapa</button>
+        <h2 id="mod-title" class="mod-title"></h2>
+        <div class="spacer"></div>
+        <button id="btn-lesson" class="btn small">📖 Aprendemos</button>
+      </div>
+      <div id="levels" class="levels"></div>
+      <div class="mascot-slot"></div>
+    </section>
+
+    <!-- ============ ACTIVIDAD ============ -->
+    <section id="scr-act" class="screen">
+      <div class="act-header">
+        <button id="btn-act-back" class="btn ghost small">◀ Salir</button>
+        <div id="act-title" class="act-title"></div>
+        <div id="act-dots" class="dots"></div>
+        <div class="spacer"></div>
+        <div class="chip star-chip">⭐ <span id="act-stars">0</span></div>
+      </div>
+      <div class="act-body">
+        <div class="act-left">
+          <div id="act-prompt" class="prompt"></div>
+          <div id="act-visual" class="visual"></div>
+          <div class="mascot-slot"></div>
+        </div>
+        <div class="act-right">
+          <div id="act-questions" class="qcard"></div>
+          <div id="keypad" class="keypad">
+            <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button>
+            <button class="key" data-k="3">3</button><button class="key" data-k="4">4</button>
+            <button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
+            <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button>
+            <button class="key" data-k="9">9</button><button class="key" data-k="0">0</button>
+            <button class="key wide del" data-k="del">⌫ Borrar</button>
+          </div>
+          <button id="btn-check" class="btn check">Comprobar ✔</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ DIPLOMA ============ -->
+    <section id="scr-diploma" class="screen">
+      <div class="dip-actions">
+        <button id="btn-dip-back" class="btn ghost small">◀ Mapa</button>
+        <button id="btn-print" class="btn small">🖨️ Imprimir diploma</button>
+      </div>
+      <div class="diploma">
+        <div class="dip-inner">
+          <span class="corner c1">⭐</span><span class="corner c2">✖️</span>
+          <span class="corner c3">➕</span><span class="corner c4">⭐</span>
+          <div class="dip-medal">🎓</div>
+          <div class="dip-kicker">DIPLOMA</div>
+          <h1 class="dip-title">EXPERTO MATEMÁTICO</h1>
+          <p class="dip-text">Se otorga a</p>
+          <input id="dip-name" class="dip-name" maxlength="40" placeholder="Escribí tu nombre" autocomplete="off">
+          <p class="dip-text">por completar con éxito todos los módulos de <b>multiplicación</b>.</p>
+          <div id="dip-badges" class="dip-badges"></div>
+          <div class="dip-foot">
+            <span>⭐ <b id="dip-stars">0</b> estrellas</span>
+            <span>2.º grado</span>
+            <span id="dip-date"></span>
+          </div>
+        </div>
+      </div>
+      <div class="mascot-slot"></div>
+    </section>
+
+    <!-- Personaje que acompaña al alumno (se mueve a la pantalla activa) -->
+    <div id="mascot" class="mascot">
+      <svg class="owl" viewBox="0 0 120 135" aria-hidden="true">
+        <ellipse cx="60" cy="129" rx="32" ry="5" fill="rgba(45,42,74,.15)"/>
+        <g class="owl-body">
+          <path class="wing wing-l" d="M24 68 Q2 92 16 116 Q32 104 32 80Z" fill="#6f4fd8"/>
+          <path class="wing wing-r" d="M96 68 Q118 92 104 116 Q88 104 88 80Z" fill="#6f4fd8"/>
+          <ellipse cx="60" cy="76" rx="40" ry="46" fill="#8e6cf0"/>
+          <ellipse cx="60" cy="92" rx="26" ry="27" fill="#efe9ff"/>
+          <text x="60" y="106" text-anchor="middle" font-size="26" font-weight="800" fill="#c3b5f5" font-family="Arial">×</text>
+          <circle cx="43" cy="60" r="15" fill="#fff"/>
+          <circle cx="77" cy="60" r="15" fill="#fff"/>
+          <circle cx="45" cy="62" r="7" fill="#2d2a4a"/>
+          <circle cx="79" cy="62" r="7" fill="#2d2a4a"/>
+          <circle cx="47.5" cy="59" r="2.4" fill="#fff"/>
+          <circle cx="81.5" cy="59" r="2.4" fill="#fff"/>
+          <ellipse class="lid" cx="43" cy="60" rx="16" ry="16" fill="#8e6cf0"/>
+          <ellipse class="lid" cx="77" cy="60" rx="16" ry="16" fill="#8e6cf0"/>
+          <path d="M55 72 L65 72 L60 81Z" fill="#ffb627"/>
+          <circle cx="30" cy="76" r="6" fill="#ff9ec7" opacity=".7"/>
+          <circle cx="90" cy="76" r="6" fill="#ff9ec7" opacity=".7"/>
+          <ellipse cx="48" cy="122" rx="8" ry="4" fill="#ffb627"/>
+          <ellipse cx="72" cy="122" rx="8" ry="4" fill="#ffb627"/>
+          <g class="cap">
+            <path d="M24 30 L60 14 L96 30 L60 44Z" fill="#2d2a4a"/>
+            <path d="M44 37 L44 46 Q60 52 76 46 L76 37 L60 44Z" fill="#3d3962"/>
+            <path d="M90 31 L93 50" stroke="#ffc53d" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="93" cy="52" r="4" fill="#ffc53d"/>
+          </g>
+        </g>
+      </svg>
+      <div id="bubble" class="bubble">¡Hola!</div>
+    </div>
+
+    <!-- Ventana emergente (lecciones, celebraciones, confirmaciones) -->
+    <div id="modal" class="modal">
+      <div class="modal-card">
+        <h2 id="modal-title"></h2>
+        <div id="modal-body"></div>
+        <div id="modal-btns" class="modal-btns"></div>
+      </div>
+    </div>
+
+    <!-- Capa de efectos (confeti, estrellas) -->
+    <div id="fx"></div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
