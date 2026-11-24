@@ -315,8 +315,8 @@ const MODULES = [
           text: 'Hay 5 cajas con 3 pelotas cada una.' }),
         itemQueSuma({ g: 2, c: 6, e: '🥚', cont: 'caja', n: 'huevos', una: 'una caja', cs: 'caja',
           text: 'Hay 2 cajas con 6 huevos cada una.' }),
-        itemQueSuma({ g: 4, c: 2, e: '🧦', cont: 'paquete', n: 'medias', una: 'un paquete', cs: 'paquete',
-          text: 'Hay 4 paquetes con 2 medias cada uno.' }),
+        itemQueSuma({ g: 4, c: 2, e: '🌟', cont: 'paquete', n: 'estrellas', una: 'un paquete', cs: 'paquete',
+          text: 'Hay 4 paquetes con 2 estrellas cada uno.' }),
         itemQueSuma({ g: 3, c: 5, e: '🌸', cont: 'maceta', n: 'flores', una: 'una maceta', cs: 'maceta',
           text: 'Hay 3 macetas con 5 flores cada una.' })
       ]}
