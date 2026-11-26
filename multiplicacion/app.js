@@ -315,8 +315,8 @@ const MODULES = [
           text: 'Hay 5 cajas con 3 pelotas cada una.' }),
         itemQueSuma({ g: 2, c: 6, e: '🥚', cont: 'caja', n: 'huevos', una: 'una caja', cs: 'caja',
           text: 'Hay 2 cajas con 6 huevos cada una.' }),
-        itemQueSuma({ g: 4, c: 2, e: '🌟', cont: 'paquete', n: 'estrellas', una: 'un paquete', cs: 'paquete',
-          text: 'Hay 4 paquetes con 2 estrellas cada uno.' }),
+        itemQueSuma({ g: 4, c: 2, e: '🧦', cont: 'paquete', n: 'medias', una: 'un paquete', cs: 'paquete',
+          text: 'Hay 4 paquetes con 2 medias cada uno.' }),
         itemQueSuma({ g: 3, c: 5, e: '🌸', cont: 'maceta', n: 'flores', una: 'una maceta', cs: 'maceta',
           text: 'Hay 3 macetas con 5 flores cada una.' })
       ]}
@@ -529,6 +529,29 @@ function modal({ title, html, buttons }) {
   });
   $('#modal').classList.add('open');
 }
+/** Ventana con la tabla pitagórica completa (ayuda disponible en cada actividad).
+    Al tocar un casillero se pintan su fila y su columna y se muestra la cuenta. */
+function showPitaModal() {
+  modal({
+    title: '🧮 Tabla pitagórica',
+    html: `<p class="pita-help">Buscá un número en la columna de la izquierda y otro en la fila de arriba.
+      ¡Donde se cruzan está el resultado! Tocá un casillero para ver la cuenta.</p>
+      ${pitaHTML(10, 10, 'pita pita-modal')}
+      <div id="pita-out" class="pita-out">&nbsp;</div>`,
+    buttons: [{ label: 'Cerrar ✖' }]
+  });
+  const card = $('.modal-card');
+  card.style.setProperty('--c', cur ? MODULES[cur.mi].color : '#8e6cf0');
+  $$('.pita-modal td', card).forEach(td => td.onclick = () => {
+    const r = +td.dataset.r, c = +td.dataset.c;
+    $$('.pita-modal .hl, .pita-modal .sel', card).forEach(el => el.classList.remove('hl', 'sel'));
+    $$(`.pita-modal [data-r="${r}"], .pita-modal [data-c="${c}"]`, card).forEach(el => el.classList.add('hl'));
+    td.classList.remove('hl');
+    td.classList.add('sel');
+    $('#pita-out').innerHTML = `${r} × ${c} = <b>${r * c}</b>`;
+  });
+}
+
 function closeModal() { $('#modal').classList.remove('open'); }
 const modalOpen = () => $('#modal').classList.contains('open');
 
@@ -699,6 +722,7 @@ function renderItem() {
   btn.classList.remove('next');
   btn.classList.toggle('hidden', item.type === 'match');
   btn.textContent = 'Comprobar ✔';
+  $('#btn-pita').classList.toggle('hidden', item.type === 'tabla');   // ahí la tabla ya está a la vista
   if (hasBlanks) focusBlank(cur.blanks[0]);
 
   if (act.hints && item.help) say('💡 <b>Pista:</b> ' + item.help);
@@ -1069,6 +1093,7 @@ function init() {
   $('#btn-lesson').onclick = () => showLesson(curModule);
   $('#btn-act-back').onclick = () => { const mi = cur ? cur.mi : curModule; cur = null; openModule(mi, true); };
   $('#btn-check').onclick = check;
+  $('#btn-pita').onclick = showPitaModal;
   $('#btn-dip-back').onclick = openMap;
   $('#btn-print').onclick = () => window.print();
   $('#dip-name').addEventListener('input', e => { state.name = e.target.value; saveState(); });
